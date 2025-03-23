@@ -1,0 +1,1 @@
+export const AUTH_COOKIE ="flowboard-flowboard-cosc310-session";
