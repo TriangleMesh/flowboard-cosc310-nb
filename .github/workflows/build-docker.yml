@@ -1,0 +1,75 @@
+name: Build Docker Image and Export as TAR
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Generate OpenSSL certificate with SAN
+      - name: Generate OpenSSL certificate
+        run: |
+          cat > openssl.cnf <<EOF
+          [req]
+          default_bits       = 4096
+          prompt             = no
+          default_md         = sha256
+          distinguished_name = req_distinguished_name
+          req_extensions     = req_ext
+
+          [req_distinguished_name]
+          CN = localhost
+
+          [req_ext]
+          subjectAltName = @alt_names
+
+          [alt_names]
+          DNS.1 = localhost
+          IP.1 = 127.0.0.1
+          EOF
+
+          openssl req -x509 -newkey rsa:4096 \
+            -keyout key.pem \
+            -out cert.pem \
+            -days 365 \
+            -nodes \
+            -config openssl.cnf
+
+      # 3. Prepare Files for Docker Image
+      - name: Prepare Files for Docker Image
+        run: |
+          mkdir -p certs
+          mv cert.pem key.pem certs/
+          ls -l certs/
+
+      # 4. Build Docker image with certificates
+      - name: Build Docker Image
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            --build-arg CERT_PATH=/app/certs \
+            -t my-app:latest \
+            .
+        env:
+          DOCKER_BUILDKIT: 1
+
+      # 5. Save and compress Docker image
+      - name: Save Docker Image as TAR
+        run: docker save -o my-app.tar my-app:latest
+
+      - name: Compress TAR
+        run: gzip my-app.tar
+
+      # 6. Upload Artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: |
+            my-app.tar.gz

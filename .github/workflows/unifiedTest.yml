@@ -1,0 +1,61 @@
+name: Run Test When New PR or push to main
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.13.0'
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start server
+        run: |
+          nohup npm run dev:https-test > server.log 2>&1 &
+          sleep 15 # Wait for the server to start (adjust the time as needed)
+
+      - name: Run Jest test using current branch test case
+        run: npx jest __tests__/
+
+
+      - name: Run test case from main branch if applicable
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ -d "__tests__" ]; then
+            rm -rf __tests__
+            git fetch origin main
+            if git ls-tree origin/main -- __tests__; then
+              git checkout origin/main -- __tests__
+              npx jest __tests__/
+            else
+              echo "No __tests__ directory found in main branch."
+            fi
+          fi
+
+      - name: Stop server
+        if: always()
+        run: pkill -f "next dev"
