@@ -4,13 +4,7 @@ A modern project management application built with Next.js, Appwrite, and Tailwi
 
 ## Team
 
-### Developers
-- **Shahzeb Iqbal** [Team Lead]
-- **Jessica**
-- **Mark**
-
-### DevOps and Testings
-- **Q**
+- **Qingyun**
 - **Germain**
 
 ## Table of Contents
