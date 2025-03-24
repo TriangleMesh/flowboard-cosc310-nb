@@ -1,5 +1,4 @@
 "use client";
-
 import {FcGoogle} from "react-icons/fc"
 import {FaGithub} from "react-icons/fa"
 import {Input} from "@/components/ui/input";
@@ -25,6 +24,7 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
+import {signUpWithGithub, signUpWithGoogle} from "@/lib/oauth";
 
 
 export const SignInCard = () => {
@@ -107,19 +107,21 @@ export const SignInCard = () => {
             <CardContent className="p-7 flex flex-col gap-y-4">
 
             <Button
-            disabled={isPending}
-            variant="secondary"
-            size="lg" 
-            className="W-full"
+                onClick={() => signUpWithGoogle()}
+                disabled={isPending}
+                variant="secondary"
+                size="lg"
+                className="W-full"
             >
                 <FcGoogle className="mr-2 size-5"/>
                 Login with Google
             </Button>
             <Button
-            disabled={isPending}
-            variant="secondary"
-            size="lg"
-            className="W-full"
+                onClick={() => signUpWithGithub()}
+                disabled={isPending}
+                variant="secondary"
+                size="lg"
+                className="W-full"
             >
                 <FaGithub className="mr-2 size-5"/>
                 Login with Github
