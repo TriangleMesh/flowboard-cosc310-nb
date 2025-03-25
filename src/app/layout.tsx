@@ -21,17 +21,26 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+        <head>
+            <link rel={"stylesheet"} href={"http://localhost:3000/notification.css"}/>
+            <link rel={"stylesheet"} href={"http://localhost:3000/chatroom/floatStyle.css"}/>
+            <script src={"http://localhost:3000/notification.js"}></script>
+            <script src={"http://localhost:3000/notificationChannel.js"}></script>
+            <script src={"http://localhost:3000/chatroom/float.js"}></script>
+        </head>
         <body
             className={cn(inter.className, "antialised min-h-screen")}
         >
-        <link rel={"stylesheet"} href={"http://localhost:3000/notification.css"}/>
         <div id="notification-container" className="notification-container"></div>
-        <script src={"http://localhost:3000/notification.js"}></script>
-        <script src={"http://localhost:3000/notificationChannel.js"}></script>
         <QueryProvider>
             <Toaster/>
             {children}
         </QueryProvider>
+        <button className="chat-button" id="chatButton">💬</button>
+        <div className="chat-iframe-container" id="chatIframeContainer">
+            <button className="close-button" id="closeButton">×</button>
+            <iframe title="Chat"></iframe>
+        </div>
         </body>
         </html>
     );
