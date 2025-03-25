@@ -186,6 +186,9 @@ type ChatRoom = {
     clients: Set<WebSocket>;
 };
 
+const BACKENDKEY = process.env.BACKENDKEY!;
+
+
 type UserSession = Models.User<Models.Preferences>;
 
 // Singleton class for the WebSocket server
@@ -271,24 +274,24 @@ class WebSocketServerSingleton {
             const url = new URL(req.url || '', `http://${req.headers.host}`);
             const chatRoomName = url.searchParams.get('chatroom');
             let session: string | null = null;
-            try {
-                 session = url.searchParams.get('session');
-            }catch (Error) {
-                console.log('Error in websocket server')
-            }
+            session = url.searchParams.get('session');
             const channel = url.searchParams.get('channel');
 
             const isValidSession = !!session;
             const isNotificationChannel = channel === 'notification';
+            const isBackendChannel = channel === 'backend';
             const isChatroomChannel = channel === 'chatroom' && !!chatRoomName;
 
-            if (!(isValidSession && (isNotificationChannel || isChatroomChannel)) && channel !== 'backend') {
+            if (!(isValidSession && (isNotificationChannel || isChatroomChannel || isBackendChannel))) {
                 console.error('Missing required parameters.');
+                console.log('chatRoomName:', chatRoomName);
+                console.log('session:', session);
+                console.log('channel:', channel);
                 ws.close(4001, 'session key, chatroom, and channel are required.');
                 return;
             }
 
-            if (session != null) {
+            if (!isBackendChannel) {
                 console.log(`Authenticating user with session key: ${session}`);
 
                 let user: UserSession;
@@ -358,6 +361,10 @@ class WebSocketServerSingleton {
                     });
                 }
             } else if (channel ==='backend') { //backend api message forwarding service
+                if (session == null || session !== BACKENDKEY){
+                    console.warn(`Backend API received an invalid key:${session}`);
+                    return;
+                }
                 console.log('Backend API message forwarding service connected.');
                 ws.on('message', (data: string) => {
                     console.log(`Received message from backend: ${data}`);
@@ -394,7 +401,7 @@ class WebSocketServerSingleton {
 
 
 export function sendNotificationToUser(userId: string, message: any) {
-    const socket = new WebSocket('ws://localhost:8080?channel=backend'); //todo make singleton later
+    const socket = new WebSocket(`ws://localhost:8080?channel=backend&session=${BACKENDKEY}`); //todo make singleton later
     console.log("Connecting to WebSocket server backend channel");
     socket.onopen = () => {
         console.log("Connected to WebSocket server backend channel");
