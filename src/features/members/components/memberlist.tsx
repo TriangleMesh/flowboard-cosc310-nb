@@ -31,6 +31,7 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
                     <div>
                         <p className="font-medium">{member.name || "Unknown User"}</p>
                         <p className="text-sm text-gray-500">{member.email || "unknown@example.com"}</p>
+                        <p className="text-sm text-blue-500 capitalize">{member.role || "unknown role"}</p>
                     </div>
                 </li>
             ))}
