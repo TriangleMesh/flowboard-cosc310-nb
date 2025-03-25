@@ -29,7 +29,7 @@ app.get(
 
     setCookie(c,AUTH_COOKIE, session.secret,{
         path:"/",
-        httpOnly: true,
+        httpOnly: false,
         secure: true,
         sameSite: "strict",
         maxAge: 60 * 60 * 24 * 30,
@@ -53,7 +53,7 @@ async (c) => {
 
     setCookie(c,AUTH_COOKIE, session.secret,{
         path:"/",
-        httpOnly: true,
+        httpOnly: false,
         secure: true,
         sameSite: "strict",
         maxAge: 60 * 60 * 24 * 30,
