@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 400px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .chat-container {
+            margin-top: 20px;
+            width: 400px;
+            height: 300px;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+
+        .system-message {
+            color: gray;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>WebSocket Chat</h1>
+
+    <!-- Authentication Form -->
+    <div id="auth-form">
+        <h2>Login</h2>
+        <input type="text" id="chatroom" placeholder="Chatroom Name" />
+        <button id="login-button">Join Chatroom</button>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chat-interface" class="hidden">
+        <h2>Chatroom: <span id="current-chatroom"></span></h2>
+        <div class="chat-container" id="chat-box"></div>
+        <input type="text" id="message-input" placeholder="Type a message..." />
+        <button id="send-button">Send</button>
+    </div>
+</div>
+
+<script>
+    let socket;
+
+    // Helper function to get a cookie by name
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Function to connect to the WebSocket server
+    function connectToServer() {
+        const chatroom = document.getElementById('chatroom').value.trim();
+
+        if (!chatroom) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        // Retrieve session cookie (if using Appwrite or similar)
+        const sessionKey = getCookie("flowboard-flowboard-cosc310-session");
+        if (!sessionKey) {
+            alert('Session key not found. Please log in.');
+            return;
+        }
+
+        // Connect to the WebSocket server with query parameters
+        const url = `ws://localhost:8080?chatroom=${encodeURIComponent(chatroom)}&session=${encodeURIComponent(sessionKey)}&channel=chatroom`;
+        socket = new WebSocket(url);
+
+        // Handle connection open
+        socket.onopen = () => {
+            console.log('Connected to the WebSocket server');
+            document.getElementById('auth-form').classList.add('hidden');
+            document.getElementById('chat-interface').classList.remove('hidden');
+            document.getElementById('current-chatroom').textContent = chatroom;
+        };
+
+        // Handle incoming messages
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('Received message:', data.message.toString())
+            const chatBox = document.getElementById('chat-box');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+
+            if (data.type === 'welcome' || data.type === 'system') {
+                messageDiv.classList.add('system-message');
+                messageDiv.textContent = `[System] ${data.message}`;
+            } else if (data.type === 'message') {
+                messageDiv.textContent = `${data.username}: ${data.message.toString()}`;
+                console.log(`Received message: ${data.message.toString()}`);
+            }
+
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+        };
+
+        // Handle connection close
+        socket.onclose = (event) => {
+            console.log(`Disconnected from the WebSocket server. Code: ${event.code}, Reason: ${event.reason}`);
+            alert('Connection closed. Please refresh the page to reconnect.');
+        };
+
+        // Handle errors
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            alert('An error occurred. Please try again.');
+        };
+    }
+
+    // Function to send a message
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+
+        if (!message) {
+            alert('Message cannot be empty.');
+            return;
+        }
+
+        // Send the message to the server
+        socket.send(message);
+        input.value = ''; // Clear the input field
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('login-button').addEventListener('click', connectToServer);
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+
+        // Allow sending messages by pressing Enter
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    });
+</script>
+</body>
+</html>
