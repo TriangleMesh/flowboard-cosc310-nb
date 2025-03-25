@@ -5,9 +5,9 @@ import {cn} from "@/lib/utils";
 import "./globals.css";
 import {QueryProvider} from "@/components/query-provider";
 import {Toaster} from "@/components/ui/sonner";
+import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
-
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -24,6 +24,10 @@ export default function RootLayout({
         <body
             className={cn(inter.className, "antialised min-h-screen")}
         >
+        <link rel={"stylesheet"} href={"http://localhost:3000/notification.css"}/>
+        <div id="notification-container" className="notification-container"></div>
+        <script src={"http://localhost:3000/notification.js"}></script>
+        <script src={"http://localhost:3000/notificationChannel.js"}></script>
         <QueryProvider>
             <Toaster/>
             {children}

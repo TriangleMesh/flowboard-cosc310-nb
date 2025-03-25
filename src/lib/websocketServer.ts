@@ -392,40 +392,16 @@ class WebSocketServerSingleton {
 //     };
 // }
 
-let socketInstance: WebSocket | null = null;
 
-function getWebSocketClientInstance(): WebSocket {
-    if (!socketInstance || socketInstance.readyState === WebSocket.CLOSED) {
-        console.log("Creating a new WebSocket connection to backend channel");
-        socketInstance = new WebSocket('ws://localhost:8080?channel=backend');
-
-        socketInstance.onopen = () => {
-            console.log("Connected to WebSocket server backend channel");
-        };
-
-        socketInstance.onerror = (error) => {
-            console.error("WebSocket error:", error);
-        };
-
-        socketInstance.onclose = () => {
-            console.log("WebSocket connection closed. Reconnecting will create a new instance.");
-            socketInstance = null; // Reset the instance to allow reconnection
-        };
-    }
-    return socketInstance;
+export function sendNotificationToUser(userId: string, message: any) {
+    const socket = new WebSocket('ws://localhost:8080?channel=backend'); //todo make singleton later
+    console.log("Connecting to WebSocket server backend channel");
+    socket.onopen = () => {
+        console.log("Connected to WebSocket server backend channel");
+        socket.send(JSON.stringify({userId, message}));
+    };
 }
 
-export function sendNotificationToUser(userId: string, message: any): void {
-    const socket = getWebSocketClientInstance();
-
-    if (socket.readyState === WebSocket.OPEN) {
-        console.log("Sending notification to user:", userId);
-        socket.send(JSON.stringify({ userId, message }));
-    } else {
-        console.warn("WebSocket is not open yet. Notification will be sent once connected.");
-        socket.addEventListener('open', () => {
-            console.log("WebSocket is now open. Sending delayed notification to user:", userId);
-            socket.send(JSON.stringify({ userId, message }));
-        });
-    }
+export function initServer(): void {
+    WebSocketServerSingleton.getInstance();
 }
