@@ -2,7 +2,7 @@
 import { Hono } from "hono";
 import { getMember } from "@/features/members/utils";
 import { zValidator } from "@hono/zod-validator";
-import { createTaskSchema } from "../schemas";
+import {createTaskSchema, updateTaskSchema} from "../schemas";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID } from "@/config"; // TODO: pending code from Jessica
 import { ID, Query } from "node-appwrite";
@@ -176,6 +176,49 @@ app.post(
         });
 
         return c.json({ data: task });
+    }
+);
+
+app.patch(
+    "/:taskId",
+    sessionMiddleware,
+    zValidator("json", updateTaskSchema),
+    async (c) => {
+        const user = c.get("user");
+        const databases = c.get("databases");
+        const taskId = c.req.param("taskId");
+        const { name, status, dueDate, assigneeId } = c.req.valid("json");
+        let workspaceId: string = "";
+
+        //get workspaceId from task
+        await databases.getDocument(DATABASE_ID, TASKS_ID, taskId).then((task) => {
+            workspaceId = task.workspaceId;
+        });
+
+        // check if user is member of workspace
+        if (workspaceId) {
+            const member = await getMember({
+                databases,
+                workspaceId,
+                userId: user.$id,
+            });
+
+            if (!member) {
+                return c.json({ error: "Unauthorized" }, 401);
+            }
+        }
+
+        // construct update task object
+        const updateData: Partial<Task> = {};
+        if (name !== undefined) updateData.name = name;
+        if (status !== undefined) updateData.status = status;
+        if (dueDate !== undefined) updateData.dueDate = dueDate;
+        if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
+
+        // update task
+        const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
+
+        return c.json({ data: updatedTask });
     }
 );
 
