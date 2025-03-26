@@ -66,4 +66,55 @@ app.get(
     }
 );
 
-export default app; 
+// Delete a member from a specific workspace
+app.delete(
+    "/",
+    sessionMiddleware,
+    zValidator(
+        "query",
+        z.object({
+            workspaceId: z.string(), // Ensure workspaceId is provided in the query
+            memberId: z.string(),   // Ensure memberId is provided in the query
+        })
+    ),
+    async (c) => {
+        const databases = c.get("databases");
+        const user = c.get("user");
+        const { workspaceId, memberId } = c.req.valid("query");
+
+        try {
+            // Step 1: Fetch the member document to check if it exists and belongs to the workspace
+            console.log("Received request:", { workspaceId, memberId });
+
+            const member = await databases.getDocument(DATABASE_ID, MEMBERS_ID, memberId);
+
+            if (!member || member.workspaceId !== workspaceId) {
+                return c.json({ error: "Member not found or does not belong to this workspace" }, 404);
+            }
+
+            // Step 2: Check if the current user is authorized to delete this member
+            const userMembership = await databases.listDocuments(
+                DATABASE_ID,
+                MEMBERS_ID,
+                [
+                    Query.equal("workspaceId", workspaceId),
+                    Query.equal("userId", user.$id),
+                ]
+            );
+
+            if (userMembership.documents.length === 0) {
+                return c.json({ error: "Unauthorized" }, 401);
+            }
+
+            // Step 3: Delete the member
+            await databases.deleteDocument(DATABASE_ID, MEMBERS_ID, memberId);
+
+            return c.json({ message: "Member deleted successfully" });
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            return c.json({ error: "Failed to delete member" }, 500);
+        }
+    }
+);
+
+export default app;
