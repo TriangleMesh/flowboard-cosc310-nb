@@ -5,7 +5,7 @@ import {toast} from "sonner";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
-type ResponseType = InferResponseType<typeof client.api.workspaces[":workspaceId"]["join"][$post],200>;
+type ResponseType = InferResponseType<typeof client.api.workspaces[":workspaceId"]["join"][$post], 200>;
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 type RequestType = InferRequestType<typeof client.api.workspaces[":workspaceId"]["join"][$post]>;
@@ -17,13 +17,11 @@ export const useJoinWorkspace = () => {
         Error,
         RequestType
     >({
-        mutationFn: async ({param,json}) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            const response = await client.api.workspaces[":workspaceId"]["join"]["$post"]({param,json});
-            return await response.json();
+        mutationFn: async ({param, json}) => {
+            // @ts-expect-error aa
+            const response = await client.api.workspaces[":workspaceId"]["join"]["$post"]({param, json});
 
-            if (!response.ok){
+            if (!response.ok) {
                 throw new Error("Failed to join workspace");
             }
 
