@@ -14,7 +14,7 @@ const client = wrapper(axios.create({
 dotenv.config({ path: '../.env.local' });
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api/members';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/" + 'api/members';
 
 // Helper function to generate random strings
 function generateRandomString(length = 6) {
@@ -29,7 +29,7 @@ describe('Members API Tests', () => {
     beforeAll(async () => {
         // Register a new user and get the current userId
         key = await registerAndGetSessionValue();
-        const currentResponse = await client.get(`https://localhost:3000/api/auth/current`, {
+        const currentResponse = await client.get(`http://localhost:3000/api/auth/current`, {
             headers: {
                 Cookie: `flowboard-flowboard-cosc310-session=${key}`,
             },
@@ -44,7 +44,7 @@ describe('Members API Tests', () => {
         workspaceFormData.append('name', workspaceName);
 
         const createWorkspaceUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            "https://localhost:3000/" + "api/workspaces";
+            "http://localhost:3000/" + "api/workspaces";
 
         const workspaceResponse = await client.post(createWorkspaceUrl, workspaceFormData, {
             headers: {
@@ -90,7 +90,7 @@ describe('Members API Tests', () => {
                 newWorkspaceFormData.append('name', newWorkspaceName);
 
                 const newWorkspaceResponse = await client.post(
-                    process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/api/workspaces",
+                    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/api/workspaces",
                     newWorkspaceFormData,
                     {
                         headers: {

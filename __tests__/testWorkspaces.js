@@ -15,7 +15,7 @@ dotenv.config({path: '../.env.local'});
 
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/" + 'api';
 
 function generateRandomString(length = 6) {
     return Math.random().toString(36).substring(2, length + 2);
