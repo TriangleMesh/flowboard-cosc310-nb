@@ -4,13 +4,13 @@ import {getMember} from "@/features/members/utils";
 import {zValidator} from "@hono/zod-validator";
 import {createTaskSchema, getTaskByIdSchema, updateTaskSchema} from "../schemas";
 import {sessionMiddleware} from "@/lib/session-middleware";
-import {DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID} from "@/config"; // TODO: pending code from Jessica
+import {DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID} from "@/config";
 import {ID, Query} from "node-appwrite";
 import {z} from "zod";
 import {TaskStatus, Task} from "../types";
-import {Project} from "@/features/projects/types"; // TODO: pending code from Jessica
+import {Project} from "@/features/projects/types";
 import {createAdminClient} from "@/lib/appwrite";
-import {sendNotificationToUser} from "@/lib/webServerLib";
+import {sendNotificationToUser} from "@/lib/websocketServer";
 
 
 const app = new Hono();
