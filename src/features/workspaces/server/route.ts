@@ -9,7 +9,6 @@ import {MemberRole} from "@/features/members/type";
 import {generateInviteCode} from "@/lib/utils";
 import { getMember } from "@/features/members/utils";
 import { Workspace } from "../types";
-import {sendNotificationToUser} from "@/lib/websocketServer"; //showcasing how to send notification to user by userId from app server
 
 const app = new Hono()
     .get("/", sessionMiddleware, async (c) => {
@@ -86,10 +85,6 @@ const app = new Hono()
                     name: user.name,
                 },
             )
-
-            sendNotificationToUser(user.$id,{ type: 'system', message: `${user.name} has created.` });
-
-
             return c.json({data: workspace});
         }
     )

@@ -24,6 +24,7 @@ export const createTaskSchema = z.object({
 ;
 
 export const updateTaskSchema = z.object({
+    taskId: z.string().min(1, "Required"),
     name: z.string().min(1, "Required").optional(),
     status: z.nativeEnum(TaskStatus, {required_error: "Required"}).optional(),
     dueDate: z.string().refine((value) => {
@@ -36,10 +37,14 @@ export const updateTaskSchema = z.object({
     }, {
         message: "Invalid date format",
     }).optional(),
-    assigneeId: z.string().trim().min(1, "Required").optional(),
-    description: z.string().optional(),
+    assigneeId: z.string().trim().min(1, "Required"),
+    projectId: z.string().optional(),
 }).refine((data) => {
     return Object.keys(data).length > 0;
 }, {
     message: "At least one field is required",
+});
+
+export const getTaskByIdSchema = z.object({
+    taskId: z.string().trim().min(1, "Required"),
 });

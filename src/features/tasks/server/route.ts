@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Hono } from "hono";
-import { getMember } from "@/features/members/utils";
-import { zValidator } from "@hono/zod-validator";
-import {createTaskSchema, updateTaskSchema} from "../schemas";
-import { sessionMiddleware } from "@/lib/session-middleware";
-import { DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID } from "@/config"; // TODO: pending code from Jessica
-import { ID, Query } from "node-appwrite";
-import { z } from "zod";
-import { TaskStatus, Task} from "../types";
-import { Project } from "@/features/projects/types"; // TODO: pending code from Jessica 
-import { createAdminClient } from "@/lib/appwrite";
+import {Hono} from "hono";
+import {getMember} from "@/features/members/utils";
+import {zValidator} from "@hono/zod-validator";
+import {createTaskSchema, getTaskByIdSchema, updateTaskSchema} from "../schemas";
+import {sessionMiddleware} from "@/lib/session-middleware";
+import {DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID} from "@/config"; // TODO: pending code from Jessica
+import {ID, Query} from "node-appwrite";
+import {z} from "zod";
+import {TaskStatus, Task} from "../types";
+import {Project} from "@/features/projects/types"; // TODO: pending code from Jessica
+import {createAdminClient} from "@/lib/appwrite";
+import {sendNotificationToUser} from "@/lib/webServerLib";
 
 
-    
 const app = new Hono();
 
 app.get(
@@ -30,11 +30,11 @@ app.get(
         })
     ),
     async (c) => {
-        const { users } = await createAdminClient(); // UPDATE: added within createAdminClient get Users()
+        const {users} = await createAdminClient(); // UPDATE: added within createAdminClient get Users()
         const databases = c.get("databases");
         const user = c.get("user");
 
-        const { workspaceId, projectId, status, search, assigneeId, dueDate } = c.req.valid("query");
+        const {workspaceId, projectId, status, search, assigneeId, dueDate} = c.req.valid("query");
 
         const member = await getMember({
             databases,
@@ -43,7 +43,7 @@ app.get(
         });
 
         if (!member) {
-            return c.json({ error: "Unauthorized" }, 401);
+            return c.json({error: "Unauthorized"}, 401);
         }
 
         const query = [
@@ -133,6 +133,19 @@ app.get(
     }
 );
 
+app.get("/getTaskById", sessionMiddleware, zValidator("query", z.object({id: z.string()}))
+    , async (c) => {
+        const databases = c.get("databases");
+        const {id} = c.req.valid("query");
+
+        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, id);
+        if (!task) {
+            return c.json({error: "Task not found"}, 404);
+        }
+
+        return c.json({data: task});
+    });
+
 app.post(
     "/",
     sessionMiddleware,
@@ -141,7 +154,7 @@ app.post(
         const user = c.get("user");
         const databases = c.get("databases");
 
-        const { name, status, workspaceId, projectId, dueDate, assigneeId } = c.req.valid("json");
+        const {name, status, workspaceId, projectId, dueDate, assigneeId} = c.req.valid("json");
 
         const member = await getMember({
             databases,
@@ -150,7 +163,7 @@ app.post(
         });
 
         if (!member) {
-            return c.json({ error: "Unauthorized" }, 401);
+            return c.json({error: "Unauthorized"}, 401);
         }
 
         const highestPositionTask = await databases.listDocuments(DATABASE_ID, TASKS_ID, [
@@ -175,19 +188,18 @@ app.post(
             position: newPosition,
         });
 
-        return c.json({ data: task });
+        return c.json({data: task});
     }
 );
 
 app.patch(
-    "/:taskId",
+    "/",
     sessionMiddleware,
     zValidator("json", updateTaskSchema),
     async (c) => {
         const user = c.get("user");
         const databases = c.get("databases");
-        const taskId = c.req.param("taskId");
-        const { name, status, dueDate, assigneeId } = c.req.valid("json");
+        const {name, status, dueDate, assigneeId, taskId} = c.req.valid("json");
         let workspaceId: string = "";
 
         //get workspaceId from task
@@ -204,7 +216,7 @@ app.patch(
             });
 
             if (!member) {
-                return c.json({ error: "Unauthorized" }, 401);
+                return c.json({error: "Unauthorized"}, 401);
             }
         }
 
@@ -215,10 +227,26 @@ app.patch(
         if (dueDate !== undefined) updateData.dueDate = dueDate;
         if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
 
+        //get userId by assigneeId
+        let notificationUserId: string = "";
+        if (assigneeId !== undefined) {
+            await databases.getDocument(DATABASE_ID, MEMBERS_ID, assigneeId).then((member) => {
+                notificationUserId = member.userId;
+            });
+        }
+
+        // get taskName by id
+        let taskName: string = "";
+        await databases.getDocument(DATABASE_ID, TASKS_ID, taskId).then((task) => {
+            taskName = task.name;
+        });
+
         // update task
         const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
 
-        return c.json({ data: updatedTask });
+        sendNotificationToUser(notificationUserId, {type: 'system', message: `${name || taskName} has been updated.`});
+
+        return c.json({data: updatedTask});
     }
 );
 
