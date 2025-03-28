@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { describe, it, expect } from '@jest/globals';
-const { loginAndGetSessionValue } = require("./getCookies");
+const { loginAndGetSessionValue } = require("./utils");
 
 
 const client = wrapper(axios.create({

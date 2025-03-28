@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll} from '@jest/globals';
-import {registerAndGetSessionValue} from "./getCookies";
+import {registerAndGetSessionValue} from "./utils";
 import * as dotenv from "dotenv";
 
 const client = wrapper(axios.create({

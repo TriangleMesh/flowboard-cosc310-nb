@@ -2,7 +2,7 @@ import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import * as dotenv from "dotenv";
-import { findLoginCookieValue, registerAndGetSessionValue } from "./getCookies";
+import { findLoginCookieValue, registerAndGetSessionValue } from "./utils";
 
 const client = wrapper(axios.create({
     httpsAgent: new (require('https').Agent)({

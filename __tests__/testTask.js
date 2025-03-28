@@ -3,7 +3,7 @@ import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
 import * as dotenv from "dotenv";
 import {beforeEach} from "node:test";
-import {findLoginCookieValue, registerAndGetSessionValue} from "./getCookies";
+import {findLoginCookieValue, registerAndGetSessionValue} from "./utils";
 import * as taskData from "ts-jest/dist/transformers/hoist-jest";
 
 const client = wrapper(axios.create({

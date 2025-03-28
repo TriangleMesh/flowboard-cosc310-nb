@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll} from '@jest/globals';
-import {findLoginCookieValue} from "./getCookies";
+import {findLoginCookieValue} from "./utils";
 import * as dotenv from 'dotenv';
 
 // Load environment variables from .env.local
