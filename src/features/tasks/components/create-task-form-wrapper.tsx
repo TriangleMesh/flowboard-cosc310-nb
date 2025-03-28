@@ -10,7 +10,7 @@ interface CreateTaskFormWrapperProps {
 }
 
 export const CreateTaskFormWrapper = ({ onCancel }: CreateTaskFormWrapperProps) => {
-    const workspaceId = useWorkspaceId();
+    const workspaceId = useWorkspaceId() as string;
 
     const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });
     const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId }); // TODO: uncomment after FB-3025 is merged
@@ -26,8 +26,7 @@ export const CreateTaskFormWrapper = ({ onCancel }: CreateTaskFormWrapperProps) 
         name: member.name,
     }));
 
-    const isLoading = isLoadingProjects || isLoadingMembers; // TODO: will uncomment after FB-3025 merge
-    // const isLoading = isLoadingProjects; // TODO: remove this after FB-3025, and replace with the line 29 code
+    const isLoading = isLoadingProjects || isLoadingMembers;
 
     if (isLoading) {
         return (

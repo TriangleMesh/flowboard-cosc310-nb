@@ -1,5 +1,3 @@
-import {createTaskSchema} from "../schemas";
-import {useCreateTask} from "../api/use-create-tasks";
 import {MemberAvatar} from "@/features/members/components/member-avatar"; // TODO: FB-3025
 import {TaskStatus} from "../types";
 import {ProjectAvatar} from "@/features/projects/components/project-avatar";
@@ -10,42 +8,35 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {useWorkspaceId} from "@/features/workspaces/hooks/use-workspace-id";
-import {useRouter} from "next/navigation";
 import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm, FormProvider, Controller} from "react-hook-form";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {DottedSeparator} from "@/components/ui/dotted-separator";
 import {cn} from "@/lib/utils";
-import {useRef} from "react";
-import {useGetTaskById} from "@/features/tasks/api/use-get-task-by-id";
+
+import {updateTaskSchema} from "@/features/tasks/schemas";
+import {useUpdateTask} from "@/features/tasks/api/use-update-tasks";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
     projectOptions: { id: string; name: string; imageUrl: string }[];
     memberOptions: { id: string; name: string }[];
+    initialValues: z.infer<typeof updateTaskSchema>; // 新增
 }
 
-export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: CreateTaskFormProps) => {
-    const workspaceId = useWorkspaceId();
-    const router = useRouter();
-    const {mutate, isPending} = useCreateTask();
-    const {data: originalTaskData, isLoading: isLoadingTaskData} = useGetTaskById({id: "67e3a4450019fd86920f"});
-    console.log(originalTaskData);
+export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initialValues}: CreateTaskFormProps) => {
+    const {mutate, isPending} = useUpdateTask();
 
-
-    const form = useForm<z.infer<typeof createTaskSchema>>({
-        resolver: zodResolver(createTaskSchema.omit({workspaceId: true})),
-        // defaultValues: {workspaceId},
+    const form = useForm<z.infer<typeof updateTaskSchema>>({
+        defaultValues: initialValues,
     });
 
-    const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
+    const onSubmit = (values: z.infer<typeof updateTaskSchema>) => {
         mutate(
-            {json: {...values, workspaceId}},
+            {json: {...values,}},
             {
                 onSuccess: () => {
                     form.reset();
@@ -58,7 +49,7 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
     return (
         <Card className="w-full h-full border-none shadow-none">
             <CardHeader className="flex p-7">
-                <CardTitle className="text-xl font-bold">Create a new task</CardTitle>
+                <CardTitle className="text-xl font-bold">Update Task</CardTitle>
             </CardHeader>
 
             <div className="px-7">
@@ -202,7 +193,7 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
                                 Cancel
                             </Button>
                             <Button disabled={isPending} type="submit" size="lg">
-                                Create Task
+                                Update Task
                             </Button>
                         </div>
                     </form>
