@@ -1,14 +1,15 @@
 import {useQuery} from "@tanstack/react-query";
 
-import {client} from "@/lib/rpc"; 
+import {client} from "@/lib/rpc";
+
 interface useGetProjectsProps {
-workspaceId: string;
+    workspaceId: string;
 };
 export const useGetProjects = ({
-workspaceId,
-}:useGetProjectsProps) => {
+                                   workspaceId,
+                               }: useGetProjectsProps) => {
     return useQuery({
-        queryKey: ["projects",workspaceId],
+        queryKey: ["projects", workspaceId],
         queryFn: async () => {
             // TODO: to find out
             // @ts-expect-error client type is actually known
