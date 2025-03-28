@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Task</title>
+    <script>
+        function getTaskIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('taskId');
+        }
+
+        function displayTask(taskId) {
+            document.getElementById('task-id').textContent = taskId;
+        }
+
+        async function fetchTaskDetails(taskId) {
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'GET',
+            });
+            const data = await response.json();
+
+            document.getElementById('task-name').value = data.data.name;
+            document.getElementById('task-status').value = data.data.status;
+            document.getElementById('task-due-date').value = data.data.dueDate;
+            document.getElementById('task-assignee-id').value = data.data.assigneeId;
+        }
+
+        async function updateTask(taskId) {
+            const name = document.getElementById('task-name').value;
+            const status = document.getElementById('task-status').value;
+            const dueDate = document.getElementById('task-due-date').value;
+            const assigneeId = document.getElementById('task-assignee-id').value;
+
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, status, dueDate, assigneeId })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('task-content').textContent = 'Task updated successfully!';
+            } else {
+                document.getElementById('task-content').textContent = `Error: ${data.error}`;
+            }
+        }
+
+        window.onload = async function () {
+            const taskId = getTaskIdFromUrl();
+            if (taskId) {
+                displayTask(taskId);
+                await fetchTaskDetails(taskId);
+            } else {
+                document.getElementById('task-content').textContent = 'Task ID not found in URL.';
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Edit Task</h1>
+    <div>
+        <strong>Task ID:</strong> <span id="task-id"></span>
+    </div>
+    <div>
+        <label for="task-name">Name:</label>
+        <input type="text" id="task-name">
+    </div>
+    <div>
+        <label for="task-status">Status:</label>
+        <input type="text" id="task-status">
+    </div>
+    <div>
+        <label for="task-due-date">Due Date:</label>
+        <input type="date" id="task-due-date">
+    </div>
+    <div>
+        <label for="task-assignee-id">Assignee ID:</label>
+        <input type="text" id="task-assignee-id">
+    </div>
+    <button onclick="updateTask(getTaskIdFromUrl())">Update Task</button>
+    <div id="task-content">
+        <!-- Task content will be displayed here -->
+    </div>
+</body>
+</html>
