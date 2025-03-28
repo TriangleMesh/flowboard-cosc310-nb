@@ -1,6 +1,5 @@
 import {createTaskSchema} from "../schemas";
 import {useCreateTask} from "../api/use-create-tasks";
-import {DatePicker} from "@/components/date-picker";
 import {MemberAvatar} from "@/features/members/components/member-avatar"; // TODO: FB-3025
 import {TaskStatus} from "../types";
 import {ProjectAvatar} from "@/features/projects/components/project-avatar";
@@ -23,6 +22,7 @@ import {Button} from "@/components/ui/button";
 import {DottedSeparator} from "@/components/ui/dotted-separator";
 import {cn} from "@/lib/utils";
 import {useRef} from "react";
+import {useGetTaskById} from "@/features/tasks/api/use-get-task-by-id";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -34,10 +34,13 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
     const workspaceId = useWorkspaceId();
     const router = useRouter();
     const {mutate, isPending} = useCreateTask();
+    const {data: originalTaskData, isLoading: isLoadingTaskData} = useGetTaskById({id: "67e3a4450019fd86920f"});
+    console.log(originalTaskData);
+
 
     const form = useForm<z.infer<typeof createTaskSchema>>({
         resolver: zodResolver(createTaskSchema.omit({workspaceId: true})),
-        defaultValues: {workspaceId},
+        // defaultValues: {workspaceId},
     });
 
     const onSubmit = (values: z.infer<typeof createTaskSchema>) => {

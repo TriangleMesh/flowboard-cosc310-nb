@@ -1,10 +1,10 @@
-import { toast } from "sonner";
-import { InferRequestType, InferResponseType } from "hono";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { client } from "@/lib/rpc";
+import {toast} from "sonner";
+import {InferRequestType, InferResponseType} from "hono";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {client} from "@/lib/rpc";
 
- // TODO : Find a fix for client error
- // @ts-ignore
+// TODO : Find a fix for client error
+// @ts-ignore
 type ResponseType = InferResponseType<typeof client.api.tasks["$post"], 200>;
 // @ts-ignore
 type RequestType = InferRequestType<typeof client.api.tasks["$post"]>;
@@ -13,9 +13,9 @@ export const useCreateTask = () => {
     const queryClient = useQueryClient();
 
     const mutation = useMutation<ResponseType, Error, RequestType>({
-        mutationFn: async ({ json }) => {
+        mutationFn: async ({json}) => {
             // @ts-ignore
-            const response = await client.api.tasks["$post"]({ json });
+            const response = await client.api.tasks["$post"]({json});
 
             if (!response.ok) {
                 throw new Error("Failed to create task");
@@ -24,7 +24,7 @@ export const useCreateTask = () => {
         },
         onSuccess: () => {
             toast.success("Task created");
-            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            queryClient.invalidateQueries({queryKey: ["tasks"]});
         },
         onError: () => {
             toast.error("Failed to create task");
