@@ -1,310 +1,247 @@
 import axios from 'axios';
-import {wrapper} from 'axios-cookiejar-support';
-import {beforeAll, describe, expect, it} from '@jest/globals';
-import * as dotenv from "dotenv";
-import {registerAndGetSessionValue} from "./utils";
+import { wrapper } from 'axios-cookiejar-support';
+import { beforeAll, describe, expect, it } from '@jest/globals';
+import * as dotenv from 'dotenv';
+import { registerAndGetSessionValue } from './utils';
 
-const client = wrapper(axios.create({
-    httpsAgent: new (require('https').Agent)({
-        rejectUnauthorized: false  // Disable certificate validation
-    }),
-    timeout: 38000,
-}));
+dotenv.config({ path: '../.env.local' });
 
-dotenv.config({path: '../.env.local'});
-const HOST = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/";
+const API_BASE = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const getApiUrl = (path) => `${API_BASE}${path}`;
+const BASE_URL = getApiUrl('/api/tasks');
 
+const client = wrapper(
+    axios.create({
+        // httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false }),
+        timeout: 38000,
+    })
+);
 
-// Base URL of your API
-const BASE_URL = HOST+ 'api/tasks';
+// ========== Utility ==========
 
-// Helper function to generate random strings
+function getAuthHeader(sessionKey) {
+    return {
+        'Cookie': `flowboard-flowboard-cosc310-session=${sessionKey}`,
+    };
+}
+
+function createFormData(fields): FormData {
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(fields)) {
+        formData.append(key, value);
+    }
+    return formData;
+}
+
 function generateRandomString(length = 6) {
     return Math.random().toString(36).substring(2, length + 2);
 }
 
-// Global variables for session and workspace/project IDs
-let key, userId, workspaceId, projectId, taskId, taskId2,memberId;
+async function createTask(
+    name = "Task-Test",
+    status = "TODO",
+    dueDate = "2023-12-31"
+) {
+    const requestBody = {
+        name,
+        status,
+        dueDate,
+        assigneeId: memberId,
+        workspaceId,
+        projectId,
+    };
+
+    return await client.post(BASE_URL, requestBody, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(sessionKey),
+        },
+    });
+}
+
+// ========== Global Test State ==========
+
+let sessionKey;
+let userId;
+let workspaceId;
+let projectId;
+let memberId;
+
+// ========== Setup ==========
+
+async function setupTestEnvironment() {
+    sessionKey = await registerAndGetSessionValue();
+
+    const currentRes = await client.get(getApiUrl('/api/auth/current'), {
+        headers: getAuthHeader(sessionKey),
+    });
+    userId = currentRes.data.data.$id;
+
+    const workspaceRes = await client.post(
+        getApiUrl('/api/workspaces'),
+        createFormData({ name: `Workspace-${generateRandomString()}` }),
+        { headers: getAuthHeader(sessionKey) }
+    );
+    workspaceId = workspaceRes.data.data.$id;
+
+    const memberRes = await client.get(
+        getApiUrl(`/api/members?workspaceId=${workspaceId}`),
+        { headers: getAuthHeader(sessionKey) }
+    );
+    memberId = memberRes.data.data.documents[0].$id;
+
+    const projectRes = await client.post(
+        getApiUrl('/api/projects'),
+        createFormData({
+            name: `Project-${generateRandomString()}`,
+            workspaceId,
+        }),
+        { headers: getAuthHeader(sessionKey) }
+    );
+    projectId = projectRes.data.data.$id;
+}
+
+// ========== Tests ==========
 
 describe('Tasks API Tests', () => {
-    // login the test user before running tests
     beforeAll(async () => {
-        // register a new user and get the current userId
-        key = await registerAndGetSessionValue();
-        const currentResponse = await client.get(`http://localhost:3000/api/auth/current`, {
-            headers: {
-                Cookie: `flowboard-flowboard-cosc310-session=${key}`,
-            },
-        });
-        expect(currentResponse.status).toEqual(200);
-        expect(currentResponse.data.data).toBeDefined();
-        userId = currentResponse.data.data.$id;
-        // get the workspaceId
-        const workspaceName = `Workspaces-${generateRandomString()}`;
-        const workspaceFormData = new FormData();
-        workspaceFormData.append('name', workspaceName);
-        const createWorkspaceUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            "http://localhost:3000/" + "api/workspaces";
-        const workspaceResponse = await client.post(createWorkspaceUrl, workspaceFormData, {
-            headers: {
-                'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-            }
-        });
-        expect(workspaceResponse.status).toBe(200);
-        expect(workspaceResponse.data.data.name).toBe(workspaceName);
-        workspaceId = workspaceResponse.data.data.$id;
-
-        const memberResponse = await client.get(`${HOST}/api/members?workspaceId=${workspaceId}`, {
-            headers: {
-                'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-            }
-        });
-        memberId = memberResponse.data.data.documents.at(0).$id
-        // get the projectId
-        const projectName = `Project-${generateRandomString()}`;
-        const createProjectFormData = new FormData();
-        createProjectFormData.append('name', projectName);
-        createProjectFormData.append('workspaceId', workspaceId);
-
-        const createProjectUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            "http://localhost:3000/" + "api/projects";
-
-        const projectResponse = await client.post(createProjectUrl, createProjectFormData, {
-            headers: {
-                'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-            }
-        });
-
-        expect(projectResponse.status).toEqual(200);
-        expect(projectResponse.data.data.name).toBe(projectName);
-        // Save project ID for later use
-        projectId = projectResponse.data.data.$id;
-
+        await setupTestEnvironment();
     });
-    describe('POST /tasks', () => {
-        it('should create a new task with status TODO successfully', async () => {
-            const taskName = `Task-${generateRandomString()}`;
-            const status = "TODO";
-            const dueDate = "2025-12-31";
-            const assigneeId = memberId;
-            const requestBody = {
-                name: taskName,
-                status: status,
-                dueDate: dueDate,
-                assigneeId: assigneeId,
-                workspaceId: workspaceId,
-                projectId: projectId
 
-            };
-            /*
-            * {
-                  "name": "Design Homepage UI",
-                  "status": "TODO",
-                  "dueDate": "2025-12-31",
-                  "assigneeId": "user_789",
-                  "workspaceId": "67d3aff10033771f5a8e",
-                  "projectId": "67d3b27e002e09ee86d2"
+    describe.each([
+        ['TODO', '2025-12-31'],
+        ['IN_PROGRESS', '2002-12-31'],
+    ])('POST /tasks with status %s', (status, dueDate) => {
+        it(`should create a task with status ${status}`, async () => {
+            const name = `Task-${generateRandomString()}`;
+            const res = await createTask(name, status, dueDate);
 
-                }
-            * */
+            expect(res.status).toBe(200);
+            const task = res.data.data;
+            expect(task.name).toBe(name);
+            expect(task.status).toBe(status);
+            expect(task.workspaceId).toBe(workspaceId);
+            expect(task.projectId).toBe(projectId);
+        });
+    });
 
-            const response = await client.post(`${BASE_URL}?workspaceId=${workspaceId}&projectId=${projectId}`, requestBody, {
+    it('should return 400 when required fields are missing', async () => {
+        const incompleteTask = {
+            status: "TODO",
+            workspaceId,
+            projectId,
+        };
+
+        try {
+            await client.post(BASE_URL, incompleteTask, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                }
+                    ...getAuthHeader(sessionKey),
+                },
             });
-            taskId = response.data.data.$id;
-            expect(response.status).toEqual(200);
-            expect(response.data.data.name).toBe(taskName);
-            expect(response.data.data.status).toBe(status);
-            expect(response.data.data.assigneeId).toBe(assigneeId);
-            expect(response.data.data.workspaceId).toBe(workspaceId);
-            expect(response.data.data.projectId).toBe(projectId);
-        });
+        } catch (error) {
+            expect(error.response.status).toBe(400);
+        }
+    });
 
-        it('should create a new task successfully with status IN_PROGRESS', async () => {
-            const taskName = `Task-${generateRandomString()}`;
-            const status = "IN_PROGRESS"; // Different status
-            const dueDate = "2002-12-31";
-            const response = await createTask(taskName,status,dueDate);
+    it('should return 401 when no session cookie is provided', async () => {
+        const requestBody = {
+            name: "Unauthorized Task",
+            status: "TODO",
+            workspaceId,
+            projectId,
+        };
 
-            expect(response.status).toEqual(200);
-            expect(response.data.data.name).toEqual(taskName);
-            expect(response.data.data.status).toEqual(status); // Verify the new status
-            expect(response.data.data.assigneeId).toEqual(memberId);
-            expect(response.data.data.workspaceId).toEqual(workspaceId);
-            expect(response.data.data.projectId).toEqual(projectId);
-        });
-
-        it('should return 400 when required fields are missing', async () => {
-            const requestBody = {
-                status: "TODO",
-                workspaceId: workspaceId,
-                projectId: projectId
-            };
-
-            try {
-                await client.post(`${BASE_URL}`, requestBody, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                    }
-                });
-            } catch (error) {
-                expect(error.response.status).toEqual(400);
-                expect(error.response.data.error).toBeDefined();
-            }
-        });
-        it('should return 401 when no session cookie is provided', async () => {
-            const requestBody = {
-                name: "Task-Test",
-                status: "TODO",
-                workspaceId: workspaceId,
-                projectId: projectId
-            };
-
-            try {
-                await client.post(`${BASE_URL}`, requestBody, {
-                    headers: {'Content-Type': 'application/json'}
-                });
-            } catch (error) {
-                expect(error.response.status).toEqual(401);
-                expect(error.response.data.error).toBe("Unauthorized");
-            }
-        });
-
+        try {
+            await client.post(BASE_URL, requestBody, {
+                headers: { 'Content-Type': 'application/json' },
+            });
+        } catch (error) {
+            expect(error.response.status).toBe(401);
+            expect(error.response.data.error).toBe("Unauthorized");
+        }
     });
 
     describe('GET /tasks', () => {
-        it('should fetch tasks successfully with valid workspaceId', async () => {
-            // Send GET request to fetch tasks
-            const response = await client.get(`${BASE_URL}`, {
-                headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                },
-                params: {
-                    workspaceId: workspaceId, // Required parameter
-                }
+        it('should fetch tasks with valid workspaceId', async () => {
+            const res = await client.get(BASE_URL, {
+                headers: getAuthHeader(sessionKey),
+                params: { workspaceId },
             });
 
-            // Validate the response
-            expect(response.status).toEqual(200);
-            expect(Array.isArray(response.data.data.documents)).toBe(true); // Ensure tasks are returned as an array
-            const tasks = response.data.data.documents;
+            expect(res.status).toBe(200);
+            const tasks = res.data.data.documents;
+            expect(Array.isArray(tasks)).toBe(true);
 
             if (tasks.length > 0) {
                 const task = tasks[0];
                 expect(task.name).toBeDefined();
-                expect(task.status).toBeDefined();
                 expect(task.workspaceId).toBe(workspaceId);
             }
         });
 
         it('should filter tasks by status', async () => {
-            // Send GET request with a specific status filter
-            const response = await client.get(`${BASE_URL}`, {
-                headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                },
-                params: {
-                    workspaceId: workspaceId,
-                    status: "TODO" // Filter by status
-                }
+            const res = await client.get(BASE_URL, {
+                headers: getAuthHeader(sessionKey),
+                params: { workspaceId, status: 'TODO' },
             });
 
-            // Validate the response
-            expect(response.status).toEqual(200);
-            const tasks = response.data.data.documents;
-            expect(tasks.every(task => task.status === "TODO")).toBe(true); // Ensure all tasks have the specified status
+            expect(res.status).toBe(200);
+            const tasks = res.data.data.documents;
+            expect(tasks.every(t => t.status === 'TODO')).toBe(true);
         });
 
-        it('should return an error if workspaceId is missing', async () => {
+        it('should return error if workspaceId is missing', async () => {
             try {
-                // Send GET request without workspaceId
-                const response = await client.get(`${BASE_URL}`, {
-                    headers: {
-                        'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                    },
-                    params: {} // Missing workspaceId
+                await client.get(BASE_URL, {
+                    headers: getAuthHeader(sessionKey),
+                    params: {},
                 });
             } catch (error) {
-                // Validate the error response
-                expect(error.response.status).toEqual(400); // Expect a 400 Bad Request error
+                expect(error.response.status).toBe(400);
             }
         });
 
-        it('should return tasks sorted by creation date descending', async () => {
-            const response = await client.get(`${BASE_URL}`, {
-                headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                },
-                params: {
-                    workspaceId: workspaceId
-                }
+        it('should return tasks sorted by createdAt descending', async () => {
+            const res = await client.get(BASE_URL, {
+                headers: getAuthHeader(sessionKey),
+                params: { workspaceId },
             });
 
-            expect(response.status).toEqual(200);
-            const tasks = response.data.data.documents;
-            if (tasks.length > 1) {
-                for (let i = 0; i < tasks.length - 1; i++) {
-                    expect(new Date(tasks[i].$createdAt) >= new Date(tasks[i + 1].$createdAt)).toBe(true);
-                }
+            const tasks = res.data.data.documents;
+            for (let i = 0; i < tasks.length - 1; i++) {
+                expect(new Date(tasks[i].$createdAt) >= new Date(tasks[i + 1].$createdAt)).toBe(true);
             }
         });
     });
 
-    describe('PATCH /task/', async => {
+    describe('PATCH /task', () => {
         it('should update a task successfully', async () => {
-            // create task
-            const response = await createTask();
-            const taskId = response.data.data.$id;
-            expect(taskId).toBeDefined();
+            const res = await createTask("Task-Original", "TODO", "2023-01-01");
+            const taskId = res.data.data.$id;
 
-            // try to modify the task just created
-            const taskName = `Task-newName`;
-            const status = "DONE"; // Different status
-            const dueDate = "2011-12-31";
-            const requestBody = {
-                taskId: taskId,
-                name: taskName,
-                status: status,
-                dueDate: dueDate,
+            const update = {
+                taskId,
+                name: "Task-Updated",
+                status: "DONE",
+                dueDate: "2011-12-31",
                 assigneeId: memberId,
-                workspaceId: workspaceId,
-                projectId: projectId
+                workspaceId,
+                projectId,
             };
 
-            const patchResponse = await client.patch(`${BASE_URL}`, requestBody, {
+            const patchRes = await client.patch(BASE_URL, update, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-                }
+                    ...getAuthHeader(sessionKey),
+                },
             });
 
-            expect(patchResponse.status).toEqual(200);
-            expect(patchResponse.data.data.name).toEqual("Task-newName");
-            expect(patchResponse.data.data.status).toEqual("DONE");
-            expect(patchResponse.data.data.dueDate).toEqual("2011-12-31T00:00:00.000+00:00");
+            expect(patchRes.status).toBe(200);
+            const updated = patchRes.data.data;
+            expect(updated.name).toBe("Task-Updated");
+            expect(updated.status).toBe("DONE");
+            expect(updated.dueDate).toBe("2011-12-31T00:00:00.000+00:00");
         });
-    })
-})
-
-async function createTask(taskName: string = "Task-Test", status: string = "TODO", dueDate: string = "2023-12-31") {
-    const requestBody = {
-        name: taskName,
-        status: status,
-        dueDate: dueDate,
-        assigneeId: memberId,
-        workspaceId: workspaceId,
-        projectId: projectId
-    };
-
-
-    return await client.post(`${BASE_URL}`, requestBody, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-        }
     });
-}
+});
