@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { wrapper } from 'axios-cookiejar-support';
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import {wrapper} from 'axios-cookiejar-support';
+import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
 import * as dotenv from "dotenv";
-import { findLoginCookieValue, registerAndGetSessionValue } from "./utils";
+import {findLoginCookieValue, registerAndGetSessionValue} from "./utils";
 
 const client = wrapper(axios.create({
     httpsAgent: new (require('https').Agent)({
@@ -11,10 +11,11 @@ const client = wrapper(axios.create({
     timeout: 38000,
 }));
 
-dotenv.config({ path: '../.env.local' });
+dotenv.config({path: '../.env.local'});
 
+const HOST = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/";
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/" + 'api/members';
+const BASE_URL = HOST + 'api/members';
 
 // Helper function to generate random strings
 function generateRandomString(length = 6) {
