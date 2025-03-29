@@ -1,4 +1,3 @@
-// src/features/tasks/components/task-view-switcher.tsx
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -15,20 +14,22 @@ import { DataTable } from "@/components/data-table";
 import KanbanView from "./kanban-view"; // 引入 KanbanView
 import React from "react";
 
+
 export const TaskViewSwitcher = () => {
     const [view, setView] = useQueryState("task-view", {
         defaultValue: "table",
     });
 
-    const { status, assigneeId, projectId, dueDate } = useTaskFilters();
+    const [{ projectId, status, assigneeId, dueDate }] = useTaskFilters(); // 确保返回的是最新值
+
     const workspaceId = useWorkspaceId();
     const { open } = useCreateTaskModal();
 
-    const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({
+    const { data: tasks, isLoading: isLoadingTasks, error } = useGetTasks({
         workspaceId,
         projectId,
-        assigneeId,
         status,
+        assigneeId,
         dueDate,
     });
 
@@ -56,6 +57,14 @@ export const TaskViewSwitcher = () => {
                 {isLoadingTasks ? (
                     <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
                         <Loader className="size-5 animate-spin text-muted-foreground" />
+                    </div>
+                ) : error ? (
+                    <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center text-destructive">
+                        Failed to load tasks. Please try again later.
+                    </div>
+                ) : tasks?.documents?.length === 0 ? (
+                    <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center text-muted-foreground">
+                        No tasks found.
                     </div>
                 ) : (
                     <>
