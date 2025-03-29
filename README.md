@@ -376,7 +376,9 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
 - Streamlined and refactored test projects to improve maintainability and readability.
 - **PR:** [#52](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/52) (Merged on Mar 28, 2025)
 
-
+### WebSocket Server Refactor for Code Reusability
+- Refactored the WebSocket server to improve code modularity and reusability.
+- **PR:** [#49](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/49) (Merged on Mar 27, 2025)
 
 
 
