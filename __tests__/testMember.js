@@ -23,7 +23,7 @@ function generateRandomString(length = 6) {
 }
 
 // Global variables for session and workspace IDs
-let key, userId, workspaceId;
+let key, userId, workspaceId, memberId;
 
 describe('Members API Tests', () => {
     // Login the test user and create a workspace before running tests
@@ -56,6 +56,18 @@ describe('Members API Tests', () => {
         expect(workspaceResponse.status).toBe(200);
         expect(workspaceResponse.data.data.name).toBe(workspaceName);
         workspaceId = workspaceResponse.data.data.$id;
+
+        //get the member id
+        const memberResponse = await client.get(`${BASE_URL}`, {
+            headers: {
+                'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+            },
+            params: {
+                workspaceId: workspaceId, // Required parameter
+            }
+        });
+
+        memberId = memberResponse.data.data.documents.at(0).$id
     });
 
     describe('GET /members', () => {
@@ -131,6 +143,35 @@ describe('Members API Tests', () => {
                 // Validate the error response
                 expect(error.response.status).toEqual(400); // Expect a 400 Bad Request error
             }
+        });
+    });
+    describe('DELETE /members', () => {
+        it('should delete a member successfully with valid key', async () => {
+            const deleteMemberResponse = await client.delete(`${BASE_URL}`, {
+                headers: {
+                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                },
+                params: {
+                    workspaceId: workspaceId, // Required parameter
+                    memberId: memberId
+
+                }
+            });
+
+            expect(deleteMemberResponse.status).toEqual(200);
+        });
+
+        it('should delete a member unsuccessfully with invalid key', async () => {
+            const deleteMemberResponse = await client.delete(`${BASE_URL}`, {
+                headers: {
+                    'Cookie': `flowboard-flowboard-cosc310-session=${key}+invalidate`
+                },
+                params: {
+                    workspaceId: workspaceId, // Required parameter
+                    memberId: memberId
+                }, validateStatus: () => true,
+            });
+            expect(deleteMemberResponse.status).toEqual(500);
         });
 
     });
