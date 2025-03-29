@@ -419,6 +419,30 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
 - Enabled easier test expansion and future feature testing.
 - **PR:** [#62](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/62) (Merged on Mar 28, 2025)
 
+
+## 🐞 Known Bugs and Plans for Addressing Them
+
+### 1. Task due date appears one day earlier on frontend due to timezone misinterpretation
+- **Issue:** `#63`
+- **Description:** Due dates show one day earlier than the input date due to timezone conversion from UTC to local time.
+- **Planned Fix:** Normalize date formatting across frontend and backend using consistent UTC/local rendering logic.
+
+### 2. [BUG] When the delete member API is called with invalid session, the web server returns code 500
+- **Issue:** `#61`
+- **Description:** Instead of returning a proper 401 Unauthorized error, the server throws 500 Internal Server Error when the session is invalid.
+- **Planned Fix:** Add proper error handling and validation in the delete member route to gracefully handle invalid sessions.
+
+### 3. [BUG] Chatroom doesn’t change when workspace switches unless it’s open/closed once
+- **Issue:** `#60`
+- **Description:** Switching between workspaces does not update the chatroom unless the chatroom panel is manually closed and reopened.
+- **Planned Fix:** Add reactive state synchronization or event-driven update logic to re-fetch chatroom data on workspace change.
+
+### 4. Non-admin users can delete Admins from Workspace Members
+- **Issue:** `#11`
+- **Description:** Role-based access control is not properly enforced, allowing members to delete admins.
+- **Planned Fix:** Restrict member deletion to admins only; prevent deletion of admin accounts through UI and backend validation.
+
+
 ## License
 
 [MIT License](LICENSE)
