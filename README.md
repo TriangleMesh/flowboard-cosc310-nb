@@ -317,6 +317,65 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
    - ✅ Passed: Should return 401 Unauthorized if user is not a member of the workspace (**1 sec 776 ms**)
    - ✅ Passed: Should return 400 Bad Request if workspaceId is missing (**280 ms**)
 
+##### **DELETE /members**
+- **Duration:** 1 sec 326 ms
+  - ✅ Passed: Should delete a member successfully with valid key (**1 sec 43 ms**)
+  - ✅ Passed: Should delete a member unsuccessfully with invalid key (**1 sec 283 ms**)
+
+
+
+## Features Added
+
+### Member Deletion Tests and Retrieve Member ID in Members API
+- Added test cases for member deletion functionality.
+- Implemented the ability to retrieve member IDs in the Members API.
+- **PR:** [#58](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/58) (Merged on Mar 28, 2025)
+
+### Update Task API Test Cases
+- Added comprehensive test cases for the Update Task API to ensure robust functionality.
+- **PR:** [#57](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/57) (Merged on Mar 28, 2025)
+
+### WebSocket Server Refactor for Code Reusability
+- Refactored the WebSocket server to improve code modularity and reusability.
+- **PR:** [#49](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/49) (Merged on Mar 27, 2025)
+
+### Edit Task Details Frontend
+- Enhanced the frontend interface for editing task details.
+- **PR:** [#48](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/48) (Merged on Mar 27, 2025)
+
+### getTaskById Endpoint and Task Update Notifications
+- Introduced the `getTaskById` endpoint for retrieving specific tasks.
+- Added notifications for task updates to improve user experience.
+- **PR:** [#46](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/46) (Merged on Mar 27, 2025)
+
+### Update Task Functionality with Validation and Authorization
+- Implemented update task functionality with robust validation and authorization checks.
+- **PR:** [#8](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/8) (Merged on Mar 25, 2025)
+
+### Chat Functionality with Floating Button and Chatroom Frontend
+- Added chat functionality, including a floating button for easy access and a dedicated chatroom frontend.
+- **PR:** [#5](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/5) (Merged on Mar 25, 2025)
+
+### WebSocket Server Initial Implementation
+- Set up the initial WebSocket server for real-time communication.
+- **PR:** [#3](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/3) (Merged on Mar 24, 2025)
+
+## Bug Fixes
+
+### Invitation URL Bug Fix
+- Resolved an issue with malformed invitation URLs.
+- **PR:** [#7](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/7) (Merged on Mar 25, 2025)
+
+### Date Picker Bug Fix
+- Fixed a bug in the date picker by replacing it with a standard input method.
+- **PR:** [#1](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/1) (Merged on Mar 23, 2025)
+
+## Refactoring Efforts
+
+### Test Projects Refactor
+- Streamlined and refactored test projects to improve maintainability and readability.
+- **PR:** [#52](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/52) (Merged on Mar 28, 2025)
+
 
 
 
