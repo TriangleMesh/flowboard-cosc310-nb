@@ -16,7 +16,13 @@ A modern project management application built with Next.js, Appwrite, and Tailwi
 - [Environment Variables](#environment-variables)
 - [API Routes](#api-routes)
 - [Contributing](#contributing)
-
+- [Test Summary](#test-summary)
+- [Features Added](#features-added)
+- [Bug Fixes](#bug-fixes)
+- [Refactoring Efforts](#refactoring-efforts)
+- [Known Bugs and Plans for Addressing Them](#known-bugs-and-plans-for-addressing-them)
+- [License](#license)
+  
 ## Overview
 
 Flowboard is a collaborative project management tool that allows teams to organize their work in workspaces, projects, and tasks. It provides a clean, intuitive interface for managing team workflows and tracking progress.
