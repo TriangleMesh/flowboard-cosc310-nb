@@ -35,7 +35,7 @@ jobs:
 
       - name: Start server
         run: |
-          nohup npm run dev:https-test > server.log 2>&1 &
+          nohup npm run start > server.log 2>&1 &
           sleep 15 # Wait for the server to start (adjust the time as needed)
 
       - name: Run Jest test using current branch test case

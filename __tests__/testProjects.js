@@ -1,20 +1,23 @@
 import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
-import {registerAndGetSessionValue} from "./getCookies";
+import {registerAndGetSessionValue} from "./utils";
 import * as dotenv from "dotenv";
+import {AUTH_COOKIE} from "../src/features/auth/constants";
 
 const client = wrapper(axios.create({
     httpsAgent: new (require('https').Agent)({
         rejectUnauthorized: false  // Disable certificate validation
     }),
-    timeout:39000,
+    timeout: 39000,
 }));
 
 dotenv.config({path: '../.env.local'});
+const HOST = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/";
+
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api/projects';
+const BASE_URL = HOST + 'api/projects';
 
 
 // Helper function to generate random strings
@@ -35,13 +38,12 @@ describe('Projects API Tests', () => {
         const formData = new FormData();
         formData.append('name', workspaceName);
 
-        const createWorkSpaceUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            "https://localhost:3000/" + "api/workspaces";
+        const createWorkSpaceUrl = HOST + "api/workspaces";
 
 
         const response = await client.post(createWorkSpaceUrl, formData, {
             headers: {
-                'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                'Cookie': `${AUTH_COOKIE}=${key}`
             }
         });
 
@@ -62,7 +64,7 @@ describe('Projects API Tests', () => {
 
             const response = await client.post(`${BASE_URL}/`, formData, {
                 headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                    'Cookie': `${AUTH_COOKIE}=${key}`
                 }
             });
 
@@ -79,7 +81,7 @@ describe('Projects API Tests', () => {
 
             const response = await client.post(`${BASE_URL}/`, formData, {
                 headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                    'Cookie': `${AUTH_COOKIE}=${key}`
                 }, validateStatus: () => true,
             });
 
@@ -120,7 +122,7 @@ describe('Projects API Tests', () => {
             const response = await client.get(`${BASE_URL}/`, {
                 params: {workspaceId},
                 headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                    'Cookie': `${AUTH_COOKIE}=${key}`
                 },
             });
 
@@ -132,7 +134,7 @@ describe('Projects API Tests', () => {
         it('should fail to fetch projects without workspaceId', async () => {
             const response = await client.get(`${BASE_URL}/`, {
                 headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                    'Cookie': `${AUTH_COOKIE}=${key}`
                 }, validateStatus: () => true,
             });
 
@@ -173,7 +175,7 @@ describe('Projects API Tests', () => {
 
             const response = await client.patch(`${BASE_URL}/${projectId}`, formData, {
                 headers: {
-                    'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                    'Cookie': `${AUTH_COOKIE}=${key}`
                 }
             });
 
@@ -195,37 +197,12 @@ describe('Projects API Tests', () => {
         });
     });
 
-
-
-    // describe('DELETE /projects/:projectId', () => {
-    //     it('should delete a project successfully', async () => {
-    //         const response = await client.delete(`${BASE_URL}/${projectId}`, {
-    //             headers: {
-    //                 'Cookie': `flowboard-flowboard-cosc310-session=${key}`
-    //             }
-    //         });
-    //
-    //         expect(response.status).toEqual(200);
-    //         expect(response.data.data.$id).toBe(projectId);
-    //     });
-    //
-    //     it('should fail to delete a project with invalid permissions', async () => {
-    //         // Simulate unauthorized access by clearing cookies
-    //         const response = await client.delete(`${BASE_URL}/${projectId}`, {
-    //             validateStatus: () => true,
-    //         });
-    //
-    //         expect(response.status).toEqual(401); // Unauthorized
-    //         expect(response.data.error).toBe('Unauthorized');
-    //     });
-    // });
-
     // Clean up after tests
     afterAll(async () => {
         // Logout the user
-        await client.post('https://localhost:3000/api/auth/logout', {}, {
+        await client.post(HOST + 'api/auth/logout', {}, {
             headers: {
-                'Cookie': `flowboard-flowboard-cosc310-session=${key}`
+                'Cookie': `${AUTH_COOKIE}=${key}`
             }
         });
     });

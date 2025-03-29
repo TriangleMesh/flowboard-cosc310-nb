@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll} from '@jest/globals';
-import {registerAndGetSessionValue} from "./getCookies";
+import {registerAndGetSessionValue} from "./utils";
 import * as dotenv from "dotenv";
 
 const client = wrapper(axios.create({
@@ -15,7 +15,7 @@ dotenv.config({path: '../.env.local'});
 
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/" + 'api';
 
 function generateRandomString(length = 6) {
     return Math.random().toString(36).substring(2, length + 2);

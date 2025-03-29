@@ -1,6 +1,12 @@
-const https = require("https");
 const {wrapper} = require("axios-cookiejar-support");
 const axios = require("axios");
+const {request} = require("node:http");
+const {URL} = require("node:url");
+const dotenv = require("dotenv");
+const {AUTH_COOKIE} = require("../src/features/auth/constants");
+
+dotenv.config({path: '../.env.local'});
+const HOST = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/";
 
 function loginAndGetSessionValue() {
     return new Promise((resolve, reject) => {
@@ -10,7 +16,7 @@ function loginAndGetSessionValue() {
         });
 
         const options = {
-            hostname: "localhost",
+            hostname: (new URL(HOST)).hostname,
             port: 3000,
             path: "/api/auth/login", // Updated path
             method: "POST",
@@ -21,13 +27,13 @@ function loginAndGetSessionValue() {
             rejectUnauthorized: false, // Ignore SSL certificate errors
         };
 
-        const req = https.request(options, (res) => {
+        const req = request(options, (res) => {
             let data = "";
             const cookies = res.headers["set-cookie"] || [];
 
             // Find the session cookie
             const sessionCookie = cookies.find((cookie) =>
-                cookie.startsWith("flowboard-flowboard-cosc310-session=")
+                cookie.startsWith(AUTH_COOKIE + "=")
             );
 
             res.on("data", (chunk) => {
@@ -59,7 +65,7 @@ const client = wrapper(axios.create({
 }));
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api/auth';
+const BASE_URL = HOST + 'api/auth';
 
 // Helper function to generate a random string for the alias
 function generateRandomAlias() {
@@ -86,7 +92,7 @@ function findLoginCookieValue(cookies) {
     }
 
     // Find the cookie that starts with the session name
-    const sessionCookie = cookies.find(cookie => cookie.startsWith('flowboard-flowboard-cosc310-session='));
+    const sessionCookie = cookies.find(cookie => cookie.startsWith(AUTH_COOKIE + "="));
 
     if (!sessionCookie) {
         return null; // Session cookie not found

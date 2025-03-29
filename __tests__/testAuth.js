@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll} from '@jest/globals';
-import {findLoginCookieValue} from "./getCookies";
+import {findLoginCookieValue} from "./utils";
 import * as dotenv from 'dotenv';
 
 // Load environment variables from .env.local
@@ -15,7 +15,7 @@ const client = wrapper(axios.create({
 }));
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api/auth';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/" + 'api/auth';
 
 // Helper function to generate a random string for the alias
 function generateRandomAlias() {

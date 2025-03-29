@@ -3,7 +3,7 @@ import {wrapper} from 'axios-cookiejar-support';
 import {describe, it, expect, beforeAll, afterAll} from '@jest/globals';
 import * as dotenv from "dotenv";
 import {beforeEach} from "node:test";
-import {findLoginCookieValue, registerAndGetSessionValue} from "./getCookies";
+import {findLoginCookieValue, registerAndGetSessionValue} from "./utils";
 import * as taskData from "ts-jest/dist/transformers/hoist-jest";
 
 const client = wrapper(axios.create({
@@ -16,7 +16,7 @@ const client = wrapper(axios.create({
 dotenv.config({path: '../.env.local'});
 
 // Base URL of your API
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000/" + 'api/tasks';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/" + 'api/tasks';
 
 // Helper function to generate random strings
 function generateRandomString(length = 6) {
@@ -31,7 +31,7 @@ describe ('Tasks API Tests', () => {
     beforeAll(async () => {
         // register a new user and get the current userId
         key = await registerAndGetSessionValue();
-        const currentResponse = await client.get(`https://localhost:3000/api/auth/current`, {
+        const currentResponse = await client.get(`http://localhost:3000/api/auth/current`, {
             headers: {
                 Cookie: `flowboard-flowboard-cosc310-session=${key}`,
             },
@@ -44,7 +44,7 @@ describe ('Tasks API Tests', () => {
         const workspaceFormData = new FormData();
         workspaceFormData.append('name', workspaceName);
         const createWorkspaceUrl = process.env.NEXT_PUBLIC_APP_URL  ||
-            "https://localhost:3000/" + "api/workspaces";
+            "http://localhost:3000/" + "api/workspaces";
         const workspaceResponse = await client.post(createWorkspaceUrl, workspaceFormData, {
             headers: {
                 'Cookie': `flowboard-flowboard-cosc310-session=${key}`
@@ -60,7 +60,7 @@ describe ('Tasks API Tests', () => {
         createProjectFormData.append('workspaceId', workspaceId);
 
         const createProjectUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            "https://localhost:3000/" + "api/projects";
+            "http://localhost:3000/" + "api/projects";
 
         const projectResponse = await client.post(createProjectUrl, createProjectFormData, {
             headers: {

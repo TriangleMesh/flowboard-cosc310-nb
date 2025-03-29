@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { describe, it, expect } from '@jest/globals';
-const { loginAndGetSessionValue } = require("./getCookies");
+const { loginAndGetSessionValue } = require("./utils");
 
 
 const client = wrapper(axios.create({
@@ -25,14 +25,14 @@ describe('api after login test', () => {
         }
 
         //add the key we just got to our request
-        const response = await client.get("https://localhost:3000/api/workspaces", {
+        const response = await client.get("http://localhost:3000/api/workspaces", {
             headers: {
                 'Cookie': `flowboard-flowboard-cosc310-session=${key}`
             }
         });
 
         //make request without cookies
-        //const response = await client.get("https://localhost:3000");
+        //const response = await client.get("http://localhost:3000");
 
         //check the response we got
         expect(response.status).toEqual(200);
