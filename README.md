@@ -420,7 +420,7 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
 - **PR:** [#62](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/62) (Merged on Mar 28, 2025)
 
 
-## 🐞 Known Bugs and Plans for Addressing Them
+## Known Bugs and Plans for Addressing Them
 
 ### 1. Task due date appears one day earlier on frontend due to timezone misinterpretation
 - **Issue:** `#63`
