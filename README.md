@@ -317,7 +317,7 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
    - ✅ Passed: Should return 401 Unauthorized if user is not a member of the workspace (**1 sec 776 ms**)
    - ✅ Passed: Should return 400 Bad Request if workspaceId is missing (**280 ms**)
 
-##### **DELETE /members**
+##### **NEW DELETE /members**
 - **Duration:** 1 sec 326 ms
   - ✅ Passed: Should delete a member successfully with valid key (**1 sec 43 ms**)
   - ✅ Passed: Should delete a member unsuccessfully with invalid key (**1 sec 283 ms**)
