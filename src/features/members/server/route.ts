@@ -82,6 +82,10 @@ app.delete(
         const user = c.get("user");
         const { workspaceId, memberId } = c.req.valid("query");
 
+        if (!user){
+            return c.json({ error: "Unauthorized" }, 401);
+        }
+
         try {
             // Step 1: Fetch the member document to check if it exists and belongs to the workspace
             console.log("Received request:", { workspaceId, memberId });
