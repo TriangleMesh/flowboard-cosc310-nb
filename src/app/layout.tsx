@@ -8,6 +8,7 @@ import {Toaster} from "@/components/ui/sonner";
 import React from "react";
 
 const inter = Inter({subsets: ["latin"]});
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -22,11 +23,11 @@ export default function RootLayout({
     return (
         <html lang="en">
         <head>
-            <link rel={"stylesheet"} href={"http://localhost:3000/notification.css"}/>
-            <link rel={"stylesheet"} href={"http://localhost:3000/chatroom/floatStyle.css"}/>
-            <script src={"http://localhost:3000/notification.js"}></script>
-            <script src={"http://localhost:3000/notificationChannel.js"}></script>
-            <script src={"http://localhost:3000/chatroom/float.js"}></script>
+            <link rel="stylesheet" href={`${baseUrl}/notification.css`} />
+            <link rel="stylesheet" href={`${baseUrl}/chatroom/floatStyle.css`} />
+            <script src={`${baseUrl}/notification.js`}></script>
+            <script src={`${baseUrl}/notificationChannel.js`}></script>
+            <script src={`${baseUrl}/chatroom/float.js`}></script>
         </head>
         <body
             className={cn(inter.className, "antialised min-h-screen")}

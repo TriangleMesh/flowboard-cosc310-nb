@@ -11,7 +11,7 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useTaskFilters } from "../hooks/use-task-filters";
 import { columns } from "./columns";
 import { DataTable } from "@/components/data-table";
-import KanbanView from "./kanban-view"; // 引入 KanbanView
+import KanbanView from "./kanban-view";
 import React from "react";
 
 
@@ -20,7 +20,7 @@ export const TaskViewSwitcher = () => {
         defaultValue: "table",
     });
 
-    const [{ projectId, status, assigneeId, dueDate }] = useTaskFilters(); // 确保返回的是最新值
+    const [{ projectId, status, assigneeId, dueDate }] = useTaskFilters();
 
     const workspaceId = useWorkspaceId();
     const { open } = useCreateTaskModal();
