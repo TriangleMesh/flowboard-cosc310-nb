@@ -360,6 +360,30 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
 - Set up the initial WebSocket server for real-time communication.
 - **PR:** [#3](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/3) (Merged on Mar 24, 2025)
 
+### OAuth for GitHub and Google
+- Add OAuth sign-up functionality for GitHub and Google
+- **PR:** [#2](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/2) (Merged on Mar 24, 2025)
+
+### Kanban Board for Status-Based Task Visualisation
+- Introduced Kanban board UI for visualizing tasks by status.
+- Improved user experience in managing workflow stages.
+- **PR:** [#53](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/53) (Merged on Mar 28, 2025)
+
+### Delete Member – Backend + Frontend
+- Added backend API and frontend interface for removing members from a workspace.
+- **PR:** [#9](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/9) (Merged on Mar 25, 2025)
+
+### Differentiate Between Admin and Member in Frontend
+- Displayed user roles in the UI and visually distinguished admins from regular members.
+- Laid groundwork for future role-based access control.
+- **PR:** [#6](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/6) (Merged on Mar 25, 2025)
+
+### Fetch All Users Under the Same Workspace
+- Implemented backend and frontend logic to retrieve all users belonging to the same workspace.
+- **PR:** [#4](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/4) (Merged on Mar 25, 2025)
+
+### 
+
 ## Bug Fixes
 
 ### Invitation URL Bug Fix
@@ -369,6 +393,11 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
 ### Date Picker Bug Fix
 - Fixed a bug in the date picker by replacing it with a standard input method.
 - **PR:** [#1](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/1) (Merged on Mar 23, 2025)
+
+### Data Filter Bug Fix
+- Resolved an issue with data filter
+- **PR:** [#54](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/54) (Merged on Mar 28, 2025)
+
 
 ## Refactoring Efforts
 
@@ -380,8 +409,15 @@ NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID=
 - Refactored the WebSocket server to improve code modularity and reusability.
 - **PR:** [#49](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/49) (Merged on Mar 27, 2025)
 
+### Extract Base URL into Environment Variable for Better Maintainability
+- Refactored API base URL logic to use environment variables, improving consistency across frontend and tests.
+- **PR:** [#56](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/56) (Merged on Mar 28, 2025)
 
-
+### Refactor Tasks API Tests for Reusability and Maintainability
+- Refactored the Tasks API test suite to eliminate duplicated logic and improve structure.
+- Extracted reusable helpers for session headers, task creation, and setup steps.
+- Enabled easier test expansion and future feature testing.
+- **PR:** [#62](https://github.com/TriangleMesh/flowboard-cosc310-nb/pull/62) (Merged on Mar 28, 2025)
 
 ## License
 
