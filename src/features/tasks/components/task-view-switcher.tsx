@@ -20,7 +20,7 @@ export const TaskViewSwitcher = () => {
         defaultValue: "table",
     });
 
-    const [{ projectId, status, assigneeId, dueDate }] = useTaskFilters();
+    const [{ projectId, status, assigneeId, dueDate,priority }] = useTaskFilters();
 
     const workspaceId = useWorkspaceId();
     const { open } = useCreateTaskModal();
@@ -31,6 +31,7 @@ export const TaskViewSwitcher = () => {
         status,
         assigneeId,
         dueDate,
+        priority
     });
 
     return (
