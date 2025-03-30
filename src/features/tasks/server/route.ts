@@ -161,7 +161,7 @@ app.post(
         const user = c.get("user");
         const databases = c.get("databases");
 
-        const {name, status, workspaceId, projectId, dueDate, assigneeId, priority, locked} = c.req.valid("json");
+        const {name, status, workspaceId, projectId, dueDate, assigneeId, priority} = c.req.valid("json");
 
         const member = await getMember({
             databases,
@@ -194,7 +194,6 @@ app.post(
             assigneeId,
             position: newPosition,
             priority,
-            locked,
         });
 
         return c.json({data: task});
@@ -233,10 +232,10 @@ app.patch(
         }
 
         //check if task is locked
-        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
-        if (task.locked && member.role === MemberRole.MEMBER) { //as string here?????
-            return c.json({error: "Task is locked"}, 403);
-        }
+        // const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
+        // if (task.locked && member.role === MemberRole.MEMBER) { //as string here?????
+        //     return c.json({error: "Task is locked"}, 403);
+        // }
 
         // construct update task object
         const updateData: Partial<Task> = {};
