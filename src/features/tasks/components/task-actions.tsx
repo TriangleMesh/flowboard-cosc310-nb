@@ -20,9 +20,6 @@ export const TaskActions = ({id, projectId, children}: TaskActionsProps) => {
     const {open} = useUpdateTaskModal();
 
     const {mutate: deleteTask} = useDeleteTask(); // Destructure the mutation function
-    const handleDeleteTask = () => {
-        deleteTask(id); // Pass the task ID to the mutation
-    };
 
 
     return (
@@ -52,7 +49,7 @@ export const TaskActions = ({id, projectId, children}: TaskActionsProps) => {
 
                     {/* Delete Task */}
                     <DropdownMenuItem
-                        onClick={handleDeleteTask} // Attach the delete handler
+                        onClick={()=>deleteTask(id)} // Attach the delete handler
                         className={`text-amber-700 focus:text-amber-700 font-medium p-[10px]`}
                     >
                         <TrashIcon className="size-4 mr-2 stroke-2"/>
