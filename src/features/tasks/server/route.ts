@@ -2,7 +2,7 @@
 import {Hono} from "hono";
 import {getMember} from "@/features/members/utils";
 import {zValidator} from "@hono/zod-validator";
-import {createTaskSchema, getTaskByIdSchema, updateTaskSchema} from "../schemas";
+import {createTaskSchema, deleteTaskSchema, getTaskByIdSchema, updateTaskSchema} from "../schemas";
 import {sessionMiddleware} from "@/lib/session-middleware";
 import {DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID} from "@/config";
 import {ID, Query} from "node-appwrite";
@@ -250,4 +250,39 @@ app.patch(
     }
 );
 
+app.delete(
+    "/",
+    sessionMiddleware,
+    zValidator("json", deleteTaskSchema),
+    async (c) => {
+        const user = c.get("user");
+        const databases = c.get("databases");
+        const {taskId} = c.req.valid("json");
+
+        let workspaceId: string = "";
+
+        //get workspaceId from task
+        await databases.getDocument(DATABASE_ID, TASKS_ID, taskId).then((task) => {
+            workspaceId = task.workspaceId;
+        });
+
+        // check if user is member of workspace
+        if (workspaceId) {
+            const member = await getMember({
+                databases,
+                workspaceId,
+                userId: user.$id,
+            });
+
+            if (!member) {
+                return c.json({error: "Unauthorized"}, 401);
+            }
+        }
+
+        await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
+
+        return c.json({success:true});
+
+    }
+);
 export default app;

@@ -48,3 +48,7 @@ export const updateTaskSchema = z.object({
 export const getTaskByIdSchema = z.object({
     taskId: z.string().trim().min(1, "Required"),
 });
+
+export const deleteTaskSchema = z.object({
+    taskId: z.string().trim().min(1, "Required"),
+});
