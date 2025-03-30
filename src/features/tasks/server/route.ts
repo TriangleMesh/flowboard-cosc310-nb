@@ -7,7 +7,7 @@ import {sessionMiddleware} from "@/lib/session-middleware";
 import {DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID} from "@/config";
 import {ID, Query} from "node-appwrite";
 import {z} from "zod";
-import {TaskStatus, Task} from "../types";
+import {TaskStatus, Task, TaskPriority} from "../types";
 import {Project} from "@/features/projects/types";
 import {createAdminClient} from "@/lib/appwrite";
 import {sendNotificationToUser} from "@/lib/websocketServer";
@@ -154,7 +154,7 @@ app.post(
         const user = c.get("user");
         const databases = c.get("databases");
 
-        const {name, status, workspaceId, projectId, dueDate, assigneeId} = c.req.valid("json");
+        const {name, status, workspaceId, projectId, dueDate, assigneeId, priority} = c.req.valid("json");
 
         const member = await getMember({
             databases,
@@ -186,6 +186,7 @@ app.post(
             dueDate,
             assigneeId,
             position: newPosition,
+            priority
         });
 
         return c.json({data: task});
@@ -199,7 +200,7 @@ app.patch(
     async (c) => {
         const user = c.get("user");
         const databases = c.get("databases");
-        const {name, status, dueDate, assigneeId, taskId} = c.req.valid("json");
+        const {name, status, dueDate, assigneeId, taskId, priority} = c.req.valid("json");
         let workspaceId: string = "";
 
         //get workspaceId from task
@@ -226,6 +227,7 @@ app.patch(
         if (status !== undefined) updateData.status = status;
         if (dueDate !== undefined) updateData.dueDate = dueDate;
         if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
+        if (priority !== undefined) updateData.priority = priority;
 
         //get userId by assigneeId
         let notificationUserId: string = "";
@@ -281,7 +283,7 @@ app.delete(
 
         await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
 
-        return c.json({success:true});
+        return c.json({success: true});
 
     }
 );

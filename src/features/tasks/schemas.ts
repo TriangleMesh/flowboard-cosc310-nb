@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {TaskStatus} from "./types";
+import {TaskPriority, TaskStatus} from "./types";
 
 export const createTaskSchema = z.object({
         name: z.string().min(1, "Required"),
@@ -16,10 +16,9 @@ export const createTaskSchema = z.object({
         }, {
             message: "Invalid date format",
         }),
-        assigneeId: z.string
-        ().trim().min(1, "Required"),
-        description:
-            z.string().optional(),
+        assigneeId: z.string().trim().min(1, "Required"),
+        description: z.string().optional(),
+        priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(), //make it optional so that no needs to change existing test cases
     })
 ;
 
@@ -37,8 +36,9 @@ export const updateTaskSchema = z.object({
     }, {
         message: "Invalid date format",
     }).optional(),
-    assigneeId: z.string().trim().min(1, "Required"),
+    assigneeId: z.string().trim().min(1, "Required").optional(),
     projectId: z.string().optional(),
+    priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(), //make it optional so that no needs to change existing test cases
 }).refine((data) => {
     return Object.keys(data).length > 0;
 }, {
