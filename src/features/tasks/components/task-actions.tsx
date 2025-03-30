@@ -8,6 +8,7 @@ import React from "react";
 
 import {ExternalLinkIcon, PencilIcon, TrashIcon} from "lucide-react";
 import {useUpdateTaskModal} from "@/features/tasks/hooks/use-update-task-modal";
+import {useDeleteTask} from "@/features/tasks/api/use-delete-tasks";
 
 interface TaskActionsProps {
     id: string;
@@ -17,6 +18,11 @@ interface TaskActionsProps {
 
 export const TaskActions = ({id, projectId, children}: TaskActionsProps) => {
     const {open} = useUpdateTaskModal();
+
+    const {mutate: deleteTask} = useDeleteTask(); // Destructure the mutation function
+    const handleDeleteTask = () => {
+        deleteTask(id); // Pass the task ID to the mutation
+    };
 
 
     return (
@@ -46,9 +52,8 @@ export const TaskActions = ({id, projectId, children}: TaskActionsProps) => {
 
                     {/* Delete Task */}
                     <DropdownMenuItem
-                        onClick={() => {
-                        }}
-                        className="text-amber-700 focus:text-amber-700 font-medium p-[10px]"
+                        onClick={handleDeleteTask} // Attach the delete handler
+                        className={`text-amber-700 focus:text-amber-700 font-medium p-[10px]`}
                     >
                         <TrashIcon className="size-4 mr-2 stroke-2"/>
                         Delete Task
