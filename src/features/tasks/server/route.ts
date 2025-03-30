@@ -27,6 +27,7 @@ app.get(
             status: z.nativeEnum(TaskStatus).nullish(),
             search: z.string().nullish(),
             dueDate: z.string().nullish(),
+            priority: z.nativeEnum(TaskPriority).nullish(),
         })
     ),
     async (c) => {
@@ -34,7 +35,7 @@ app.get(
         const databases = c.get("databases");
         const user = c.get("user");
 
-        const {workspaceId, projectId, status, search, assigneeId, dueDate} = c.req.valid("query");
+        const {workspaceId, projectId, status, search, assigneeId, dueDate, priority} = c.req.valid("query");
 
         const member = await getMember({
             databases,
@@ -74,6 +75,11 @@ app.get(
         if (search) {
             console.log("search:", search);
             query.push(Query.search("name", search));
+        }
+
+        if (priority){ //todo admin only?
+            console.log("priority:", priority);
+            query.push(Query.equal("priority", priority));
         }
 
         const tasks = await databases.listDocuments<Task>(DATABASE_ID, TASKS_ID, query);
