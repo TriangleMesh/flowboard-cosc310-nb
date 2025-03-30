@@ -1,12 +1,10 @@
-// @ts-nocheck // TODO: To fix the lint errors
-
-import { useGetMembers } from "@/features/members/api/use-get-members";
-import { useGetProjects } from "@/features/projects/api/use-get-projects";
-import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
-import { ListChecksIcon, UserIcon, FolderIcon } from "lucide-react";
-import { TaskStatus } from "../types";
-import { DatePicker } from "@/components/date-picker";
-import { useTaskFilters } from "../hooks/use-task-filters";
+import {useGetMembers} from "@/features/members/api/use-get-members";
+import {useGetProjects} from "@/features/projects/api/use-get-projects";
+import {useWorkspaceId} from "@/features/workspaces/hooks/use-workspace-id";
+import {ListChecksIcon, UserIcon, FolderIcon, Clock1Icon} from "lucide-react";
+import {TaskPriority, TaskStatus} from "../types";
+import {DatePicker} from "@/components/date-picker";
+import {useTaskFilters} from "../hooks/use-task-filters";
 
 import {
     Select,
@@ -21,10 +19,10 @@ interface DataFiltersProps {
     hideProjectFilter?: boolean;
 }
 
-export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
+export const DataFilters = ({hideProjectFilter}: DataFiltersProps) => {
     const workspaceId = useWorkspaceId();
-    const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });
-    const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId });
+    const {data: projects, isLoading: isLoadingProjects} = useGetProjects({workspaceId});
+    const {data: members, isLoading: isLoadingMembers} = useGetMembers({workspaceId});
 
     const isLoading = isLoadingProjects || isLoadingMembers;
 
@@ -38,18 +36,22 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
         label: member.name,
     }));
 
-    const [{ status, assigneeId, projectId, dueDate }, setFilters] = useTaskFilters();
+    const [{status, assigneeId, projectId, dueDate, priority}, setFilters] = useTaskFilters();
 
     const onStatusChange = (value: string) => {
-        setFilters({ status: value === "all" ? null : (value as TaskStatus) });
+        setFilters({status: value === "all" ? null : (value as TaskStatus)});
     };
 
     const onAssigneeChange = (value: string) => {
-        setFilters({ assigneeId: value === "all" ? null : value });
+        setFilters({assigneeId: value === "all" ? null : value});
     };
 
     const onProjectChange = (value: string) => {
-        setFilters({ projectId: value === "all" ? null : value });
+        setFilters({projectId: value === "all" ? null : value});
+    };
+
+    const onPriorityChange  = (value: string) => {
+        setFilters({priority: value === "all" ? null : (value as TaskPriority) });
     };
 
     if (isLoading) return null;
@@ -60,13 +62,13 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
             <Select defaultValue={status ?? undefined} onValueChange={onStatusChange}>
                 <SelectTrigger className="w-full lg:w-auto h-8">
                     <div className="flex items-center">
-                        <ListChecksIcon className="size-4 mr-2" />
-                        <SelectValue placeholder="All statuses" />
+                        <ListChecksIcon className="size-4 mr-2"/>
+                        <SelectValue placeholder="All statuses"/>
                     </div>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
-                    <SelectSeparator />
+                    <SelectSeparator/>
                     <SelectItem value={TaskStatus.BACKLOG}>Backlog</SelectItem>
                     <SelectItem value={TaskStatus.IN_PROGRESS}>In Progress</SelectItem>
                     <SelectItem value={TaskStatus.IN_REVIEW}>In Review</SelectItem>
@@ -79,13 +81,13 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
             <Select defaultValue={assigneeId ?? undefined} onValueChange={onAssigneeChange}>
                 <SelectTrigger className="w-full lg:w-auto h-8">
                     <div className="flex items-center">
-                        <UserIcon className="size-4 mr-2" />
-                        <SelectValue placeholder="All assignees" />
+                        <UserIcon className="size-4 mr-2"/>
+                        <SelectValue placeholder="All assignees"/>
                     </div>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">All assignees</SelectItem>
-                    <SelectSeparator />
+                    <SelectSeparator/>
                     {memberOptions?.map((member) => (
                         <SelectItem key={member.value} value={member.value}>
                             {member.label}
@@ -99,13 +101,13 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
                 <Select defaultValue={projectId ?? undefined} onValueChange={onProjectChange}>
                     <SelectTrigger className="w-full lg:w-auto h-8">
                         <div className="flex items-center">
-                            <FolderIcon className="size-4 mr-2" />
-                            <SelectValue placeholder="All projects" />
+                            <FolderIcon className="size-4 mr-2"/>
+                            <SelectValue placeholder="All projects"/>
                         </div>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All projects</SelectItem>
-                        <SelectSeparator />
+                        <SelectSeparator/>
                         {projectOptions?.map((project) => (
                             <SelectItem key={project.value} value={project.value}>
                                 {project.label}
@@ -121,9 +123,30 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
                 className="h-8 w-full lg:w-auto"
                 value={dueDate ? new Date(dueDate) : undefined}
                 onChange={(date) => {
-                    setFilters({ dueDate: date ? date.toISOString() : null });
+                    setFilters({dueDate: date ? date.toISOString() : null});
                 }}
             />
+
+            {/* Priority Filter */}
+            <Select defaultValue={priority ?? undefined} onValueChange={onPriorityChange}>
+                <SelectTrigger className="w-full lg:w-auto h-8">
+                    <div className="flex items-center">
+                        <Clock1Icon className="size-4 mr-2"/>
+                        <SelectValue placeholder="All Priority"/>
+                    </div>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All priority</SelectItem>
+                    <SelectSeparator/>
+                    <SelectSeparator/>
+                    <SelectItem value={TaskPriority.LOW}>Low</SelectItem>
+                    <SelectItem value={TaskPriority.MEDIUM_LOW}>Medium Low</SelectItem>
+                    <SelectItem value={TaskPriority.MEDIUM}>Medium</SelectItem>
+                    <SelectItem value={TaskPriority.MEDIUM_HIGH}>Medium High</SelectItem>
+                    <SelectItem value={TaskPriority.HIGH}>High</SelectItem>
+                    <SelectItem value={TaskPriority.CRITICAL}>Critical</SelectItem>
+                </SelectContent>
+            </Select>
         </div>
     );
 };
