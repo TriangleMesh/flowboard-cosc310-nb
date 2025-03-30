@@ -20,7 +20,7 @@ export const createTaskSchema = z.object({
         description: z.string().optional(),
         //make the following optional so that no need to change existing test cases
         priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(),
-        locked: z.boolean().optional().default(false),
+        //locked: z.boolean().optional().default(false),
     })
 ;
 

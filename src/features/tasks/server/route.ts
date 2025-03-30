@@ -11,7 +11,6 @@ import {Task, TaskPriority, TaskStatus} from "../types";
 import {Project} from "@/features/projects/types";
 import {createAdminClient} from "@/lib/appwrite";
 import {sendNotificationToUser} from "@/lib/websocketServer";
-import {Databases} from "node-appwrite/dist/services/databases";
 import {MemberRole} from "@/features/members/type";
 
 
@@ -235,7 +234,7 @@ app.patch(
 
         //check if task is locked
         const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
-        if (task.locked && member.role !== MemberRole.ADMIN) {
+        if (task.locked && member.role === MemberRole.MEMBER) { //as string here?????
             return c.json({error: "Task is locked"}, 403);
         }
 
