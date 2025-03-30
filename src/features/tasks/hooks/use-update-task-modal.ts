@@ -7,7 +7,7 @@ export const useUpdateTaskModal = () => {
     );
 
     const [taskId, setTaskId] = useQueryState(
-        "task-id",
+        "taskId",
         parseAsString.withDefault("").withOptions({clearOnDefault: true})
     );
 
@@ -16,13 +16,17 @@ export const useUpdateTaskModal = () => {
         setIsOpen(true);
     }
 
-    const close = () => setIsOpen(false);
+    const close = () =>{
+        setTaskId("");
+        setIsOpen(false);
+    }
 
     return {
         isOpen,
         open,
         close,
         setIsOpen,
-        taskId
+        taskId,
+        setTaskId
     };
 };
