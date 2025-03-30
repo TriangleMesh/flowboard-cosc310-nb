@@ -21,8 +21,6 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {DottedSeparator} from "@/components/ui/dotted-separator";
 import {cn} from "@/lib/utils";
-import {useRef} from "react";
-import {useGetTaskById} from "@/features/tasks/api/use-get-task-by-id";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -32,10 +30,7 @@ interface CreateTaskFormProps {
 
 export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: CreateTaskFormProps) => {
     const workspaceId = useWorkspaceId();
-    const router = useRouter();
     const {mutate, isPending} = useCreateTask();
-    const {data: originalTaskData, isLoading: isLoadingTaskData} = useGetTaskById({id: "67e3a4450019fd86920f"});
-    console.log(originalTaskData);
 
 
     const form = useForm<z.infer<typeof createTaskSchema>>({
