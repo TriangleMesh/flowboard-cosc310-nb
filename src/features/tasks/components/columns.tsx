@@ -139,7 +139,7 @@ export const columns: ColumnDef<Task>[] = [
         },
         cell: ({row}) => {
             const priority = row.original.priority;
-            if (!priority){
+            if (!priority || priority === "NULL"){
                 return <Badge variant="default">No Priority</Badge>;
             }
             // If using snakeCaseToTitleCase:

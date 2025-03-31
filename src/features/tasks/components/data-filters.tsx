@@ -139,6 +139,7 @@ export const DataFilters = ({hideProjectFilter}: DataFiltersProps) => {
                     <SelectItem value="all">All priority</SelectItem>
                     <SelectSeparator/>
                     <SelectSeparator/>
+                    <SelectItem value={TaskPriority.NULL}>No Priority</SelectItem>
                     <SelectItem value={TaskPriority.LOW}>Low</SelectItem>
                     <SelectItem value={TaskPriority.MEDIUM_LOW}>Medium Low</SelectItem>
                     <SelectItem value={TaskPriority.MEDIUM}>Medium</SelectItem>
