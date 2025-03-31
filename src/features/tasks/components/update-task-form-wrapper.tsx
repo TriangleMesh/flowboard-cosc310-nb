@@ -8,7 +8,7 @@ import {UpdateTaskForm} from "@/features/tasks/components/update-task-form";
 
 interface UpdateTaskFormWrapperProps {
     onCancel: () => void;
-    id: string;
+    taskId: string;
 }
 
 function timeToDateString(timestamp: Date) {
@@ -21,10 +21,10 @@ function timeToDateString(timestamp: Date) {
     return `${year}-${month}-${day}`;
 }
 
-export const UpdateTaskFormWrapper = async ({onCancel,id}: UpdateTaskFormWrapperProps) => {
+export const UpdateTaskFormWrapper = async ({onCancel,taskId}: UpdateTaskFormWrapperProps) => {
     const workspaceId = useWorkspaceId() as string;
 
-    const { data: initialValues, isLoading: isLoadingTask } = useGetTaskById({ taskId: id });
+    const { data: initialValues, isLoading: isLoadingTask } = useGetTaskById({ taskId: taskId });
     const { data: projects, isLoading: isLoadingProjects } = useGetProjects({ workspaceId });
     const { data: members, isLoading: isLoadingMembers } = useGetMembers({ workspaceId }); // TODO: uncomment after FB-3025 is merged
 
