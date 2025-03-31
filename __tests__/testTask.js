@@ -62,7 +62,6 @@ async function createTask(
 // ========== Global Test State ==========
 
 let sessionKey;
-let userId;
 let workspaceId;
 let projectId;
 let memberId;
@@ -75,7 +74,6 @@ async function setupTestEnvironment() {
     const currentRes = await client.get(getApiUrl('/api/auth/current'), {
         headers: getAuthHeader(sessionKey),
     });
-    userId = currentRes.data.data.$id;
 
     const workspaceRes = await client.post(
         getApiUrl('/api/workspaces'),

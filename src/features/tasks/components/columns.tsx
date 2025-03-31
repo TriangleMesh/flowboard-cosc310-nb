@@ -124,7 +124,7 @@ export const columns: ColumnDef<Task>[] = [
             return <Badge variant={status}>{snakeCaseToTitleCase(status)}</Badge>;
             //   return <Badge variant={status}>{status}</Badge>;
         },
-    },    {
+    },{
         accessorKey: "priority",
         header: ({column}) => {
             return (
@@ -139,12 +139,54 @@ export const columns: ColumnDef<Task>[] = [
         },
         cell: ({row}) => {
             const priority = row.original.priority;
-            if (!priority){
+            if (!priority || priority === "NULL") {
                 return <Badge variant="default">No Priority</Badge>;
             }
             // If using snakeCaseToTitleCase:
             return <Badge>{snakeCaseToTitleCase(priority)}</Badge>;
             //   return <Badge variant={status}>{status}</Badge>;
+        },
+    }, {
+        accessorKey: "locked",
+        header: ({column}) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Lock Status
+                    <ArrowUpDown className="ml-2 h-4 w-4"/>
+                </Button>
+            );
+        },
+        cell: ({row}) => {
+            const locked = row.original.locked;
+            if (locked) {
+                return <Badge variant="destructive">Locked</Badge>;
+            } else {
+                return;
+            }
+        },
+    }, {
+        accessorKey: "description",
+        header: ({column}) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Description
+                    <ArrowUpDown className="ml-2 h-4 w-4"/>
+                </Button>
+            );
+        },
+        cell: ({row}) => {
+            const description = row.original.description;
+            if (description) {
+                return <p>{description}</p>;
+            } else {
+                return;
+            }
         },
     },
     {

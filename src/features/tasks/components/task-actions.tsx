@@ -27,20 +27,6 @@ export const TaskActions = ({id, projectId, children}: TaskActionsProps) => {
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                    {/* Task Details */}
-                    <DropdownMenuItem onClick={() => {
-                    }} className="font-medium p-[10px]">
-                        <ExternalLinkIcon className="size-4 mr-2 stroke-2"/>
-                        Task Details
-                    </DropdownMenuItem>
-
-                    {/* Open Project */}
-                    <DropdownMenuItem onClick={() => {
-                    }} className="font-medium p-[10px]">
-                        <ExternalLinkIcon className="size-4 mr-2 stroke-2"/>
-                        Open Project
-                    </DropdownMenuItem>
-
                     {/* Edit Task */}
                     <DropdownMenuItem onClick={() => open(id)} className="font-medium p-[10px]">
                         <PencilIcon className="size-4 mr-2 stroke-2"/>
