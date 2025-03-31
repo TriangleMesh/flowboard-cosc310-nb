@@ -162,7 +162,7 @@ app.post(
         const user = c.get("user");
         const databases = c.get("databases");
 
-        const {name, status, workspaceId, projectId, dueDate, assigneeId, priority} = c.req.valid("json");
+        const {name, status, workspaceId, projectId, dueDate, assigneeId, priority, description, locked} = c.req.valid("json");
 
         const member = await getMember({
             databases,
@@ -195,6 +195,8 @@ app.post(
             assigneeId,
             position: newPosition,
             priority,
+            description,
+            locked,
         });
 
         return c.json({data: task});
