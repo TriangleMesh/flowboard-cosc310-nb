@@ -6,7 +6,6 @@ import { useCurrent } from "@/features/auth/api/use-current";
 import { useGetWorkspace } from "@/features/workspaces/api/use-get-workspace-by-id";
 import React from "react";
 
-
 interface MemberListProps {
     workspaceId: string;
 }
@@ -38,7 +37,17 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
         );
     }
 
+    // Sort members so that ADMIN is at the top
     const members = membersData?.documents || [];
+    const sortedMembers = [...members].sort((a, b) => {
+        if (a.role === "ADMIN" && b.role !== "ADMIN") {
+            return -1; // Move ADMIN to the top
+        }
+        if (a.role !== "ADMIN" && b.role === "ADMIN") {
+            return 1; // Move non-ADMINs down
+        }
+        return 0; // Keep the same order for other roles
+    });
 
     const handleDelete = async (memberId: string) => {
         if (confirm("Are you sure you want to delete this member?")) {
@@ -53,7 +62,7 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
 
     return (
         <ul>
-            {members.map((member: any) => {
+            {sortedMembers.map((member: any) => {
                 const isMemberAdmin = member.role === "ADMIN";
 
                 return (
