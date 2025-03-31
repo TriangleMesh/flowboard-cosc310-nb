@@ -2,24 +2,26 @@ import {useQuery} from "@tanstack/react-query";
 import {client} from "@/lib/rpc";
 
 interface UseGetTaskByIdProps {
-    id: string;
+    taskId: string;
 }
 
 export const useGetTaskById = ({
-                                id
+                                taskId
                             }: UseGetTaskByIdProps) => {
     return useQuery({
         queryKey: [
-            "getTaskById"
+            "task",taskId
         ],
         queryFn: async () => {
             // @ts-ignore
             const response = await client.api.tasks.getTaskById.$get({
-                query: { id },
+                query:{
+                    taskId
+                }
             });
 
             if (!response.ok) {
-                throw new Error("Failed to fetch tasks");
+                throw new Error("Failed to fetch task");
             }
 
             const {data} = await response.json();
