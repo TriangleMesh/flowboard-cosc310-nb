@@ -5,16 +5,12 @@ import {useUpdateTaskModal} from "@/features/tasks/hooks/use-update-task-modal";
 import {UpdateTaskFormWrapper} from "@/features/tasks/components/update-task-form-wrapper";
 
 export const UpdateTaskModal = () => {
-    const {isOpen, open, close} = useUpdateTaskModal();
+    const {taskId, close} = useUpdateTaskModal();
     return (
-        <ResponsiveModal open={isOpen} onOpenChange={(newOpenState) => {
-            if (newOpenState) {
-                open("placeholder");
-            } else {
-                close()
+        <ResponsiveModal open={!!taskId} onOpenChange={close}>
+            {
+                taskId && (<UpdateTaskFormWrapper id={taskId} onCancel={close}/>)
             }
-        }}>
-            <UpdateTaskFormWrapper onCancel={close}/>
         </ResponsiveModal>
     );
 };

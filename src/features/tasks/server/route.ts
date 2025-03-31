@@ -140,12 +140,13 @@ app.get(
     }
 );
 
-app.get("/getTaskById", sessionMiddleware, zValidator("query", z.object({id: z.string()}))
+//todo add authentication here
+app.get("/getTaskById", sessionMiddleware, zValidator("query", z.object({taskId: z.string()}))
     , async (c) => {
         const databases = c.get("databases");
-        const {id} = c.req.valid("query");
+        const {taskId} = c.req.valid("query");
 
-        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, id);
+        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
         if (!task) {
             return c.json({error: "Task not found"}, 404);
         }
