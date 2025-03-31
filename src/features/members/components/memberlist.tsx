@@ -5,7 +5,7 @@ import { useDeleteMember } from "@/features/members/api/use-delete-member";
 import { useCurrent } from "@/features/auth/api/use-current";
 import { useGetWorkspace } from "@/features/workspaces/api/use-get-workspace-by-id";
 import React from "react";
-
+import {useUpdateMemberRole} from "@/features/members/api/use-update-member-role";
 
 interface MemberListProps {
     workspaceId: string;
@@ -16,7 +16,7 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
     const deleteMemberMutation = useDeleteMember();
     const { data: currentUser } = useCurrent();
     const { data: workspace, isLoading: isWorkspaceLoading, isError: isWorkspaceError } = useGetWorkspace(workspaceId);
-
+    const updateRoleMutation = useUpdateMemberRole();
     // Debugging output
     console.log("Workspace:", workspace);
     console.log("Is Workspace Loading:", isWorkspaceLoading);
@@ -38,7 +38,17 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
         );
     }
 
+    // Sort members so that ADMIN is at the top
     const members = membersData?.documents || [];
+    const sortedMembers = [...members].sort((a, b) => {
+        if (a.role === "ADMIN" && b.role !== "ADMIN") {
+            return -1; // Move ADMIN to the top
+        }
+        if (a.role !== "ADMIN" && b.role === "ADMIN") {
+            return 1; // Move non-ADMINs down
+        }
+        return 0; // Keep the same order for other roles
+    });
 
     const handleDelete = async (memberId: string) => {
         if (confirm("Are you sure you want to delete this member?")) {
@@ -53,7 +63,7 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
 
     return (
         <ul>
-            {members.map((member: any) => {
+            {sortedMembers.map((member: any) => {
                 const isMemberAdmin = member.role === "ADMIN";
 
                 return (
@@ -67,12 +77,31 @@ export const MemberList = ({ workspaceId }: MemberListProps) => {
                             <p className="text-sm text-blue-500 capitalize">{member.role || "unknown role"}</p>
                         </div>
                         {isAdmin && !isMemberAdmin && (
-                            <button
-                                onClick={() => handleDelete(member.$id)}
-                                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                                Delete
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleDelete(member.$id)}
+                                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            await updateRoleMutation.mutateAsync({
+                                                workspaceId,
+                                                memberId: member.$id,
+                                                role: "ADMIN",
+                                            });
+                                            alert("Member promoted to admin successfully");
+                                        } catch (error) {
+                                            alert("Failed to promote member");
+                                        }
+                                    }}
+                                    className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                                >
+                                    Make Admin
+                                </button>
+                            </div>
                         )}
                     </li>
                 );
