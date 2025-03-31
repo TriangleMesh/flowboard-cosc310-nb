@@ -9,7 +9,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {z} from "zod";
-import {useForm, FormProvider, Controller} from "react-hook-form";
+import {useForm, FormProvider} from "react-hook-form";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
@@ -20,6 +20,8 @@ import {cn} from "@/lib/utils";
 import {updateTaskSchema} from "@/features/tasks/schemas";
 import {useUpdateTask} from "@/features/tasks/api/use-update-tasks";
 import {Switch} from "@/components/ui/switch";
+import {useCurrent} from "@/features/auth/api/use-current";
+import {useGetWorkspace} from "@/features/workspaces/api/use-get-workspace-by-id";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -30,6 +32,11 @@ interface CreateTaskFormProps {
 
 export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initialValues}: CreateTaskFormProps) => {
     const {mutate, isPending} = useUpdateTask();
+    const currentUser = useCurrent();
+    const {data: workspace} = useGetWorkspace(initialValues.workspaceId);
+
+    const isAdmin = workspace?.userId === currentUser?.data.$id;
+    console.log("isAdmin", isAdmin);
 
     const form = useForm<z.infer<typeof updateTaskSchema>>({
         defaultValues: initialValues,
@@ -223,27 +230,27 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                             />
 
                             {/* Locked Field */}
-                            <FormField
-                                control={form.control}
-                                name="locked"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Lock Status</FormLabel>
-                                        <FormControl>
-                                            {/* Use a Switch component for the toggle */}
-                                            <div className="flex items-center space-x-2">
-                                                <Switch
-                                                    checked={field.value} // Bind the current value of the field
-                                                    onCheckedChange={field.onChange} // Update the field value when toggled
-                                                />
-                                                <span>{field.value ? "Locked" : "Unlocked"}</span> {/* Optional: Display the state */}
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
+                            {isAdmin && (
+                                <FormField
+                                    control={form.control}
+                                    name="locked"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Lock Status</FormLabel>
+                                            <FormControl>
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch
+                                                        checked={field.value} // Bind the current value of the field
+                                                        onCheckedChange={field.onChange} // Update the field value when toggled
+                                                    />
+                                                    <span>{field.value ? "Locked" : "Unlocked"}</span> {/* Optional: Display the state */}
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
                         </div>
 
                         <DottedSeparator className="py-7"/>
