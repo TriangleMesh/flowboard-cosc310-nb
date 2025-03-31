@@ -162,7 +162,7 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({row}) => {
             const locked = row.original.locked;
             if (locked) {
-                return <Badge variant="default">Locked</Badge>;
+                return <Badge variant="destructive">Locked</Badge>;
             } else {
                 return;
             }
