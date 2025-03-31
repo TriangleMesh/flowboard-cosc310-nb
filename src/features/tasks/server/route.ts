@@ -250,7 +250,9 @@ app.patch(
         if (status !== undefined) updateData.status = status;
         if (dueDate !== undefined) updateData.dueDate = dueDate;
         if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
-        if (priority !== undefined) updateData.priority = priority;
+        if (priority !== undefined) { // @ts-ignore
+            updateData.priority = priority;
+        }
         if (description !== undefined) updateData.description = description;
         if (locked !== undefined) updateData.locked = locked;
 
@@ -304,9 +306,10 @@ app.delete(
             workspaceId = task.workspaceId;
         });
 
+        let member;
         // check if user is member of workspace
         if (workspaceId) {
-            const member = await getMember({
+            member = await getMember({
                 databases,
                 workspaceId,
                 userId: user.$id,
@@ -315,6 +318,14 @@ app.delete(
             if (!member) {
                 return c.json({error: "Unauthorized"}, 401);
             }
+        } else {
+            return c.json({error: "Task not found"}, 404);
+        }
+
+        //check if task is locked
+        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
+        if (task.locked) {
+            return c.json({error: "Task is locked"}, 403);
         }
 
         await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
