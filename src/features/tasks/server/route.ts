@@ -267,6 +267,10 @@ app.patch(
             }
         }
 
+        if (updateData.locked !== undefined && member.role === MemberRole.MEMBER) {
+            return c.json({error: "Only admin can change task lock status"}, 403);
+        }
+
         //get userId by assigneeId
         let notificationUserId: string = "";
         if (assigneeId !== undefined) {
