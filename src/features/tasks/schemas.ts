@@ -18,7 +18,9 @@ export const createTaskSchema = z.object({
         }),
         assigneeId: z.string().trim().min(1, "Required"),
         description: z.string().optional(),
-        priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(), //make it optional so that no needs to change existing test cases
+        //make the following optional so that no need to change existing test cases
+        priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(),
+        //locked: z.boolean().optional().default(false),
     })
 ;
 
@@ -38,7 +40,8 @@ export const updateTaskSchema = z.object({
     }).optional(),
     assigneeId: z.string().trim().min(1, "Required").optional(),
     projectId: z.string().optional(),
-    priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(), //make it optional so that no needs to change existing test cases
+    //make the following optional so that no need to change existing test cases
+    priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional(),
 }).refine((data) => {
     return Object.keys(data).length > 0;
 }, {

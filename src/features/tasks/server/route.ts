@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {Hono} from "hono";
+import {Context, Hono} from "hono";
 import {getMember} from "@/features/members/utils";
 import {zValidator} from "@hono/zod-validator";
-import {createTaskSchema, deleteTaskSchema, getTaskByIdSchema, updateTaskSchema} from "../schemas";
+import {createTaskSchema, deleteTaskSchema, updateTaskSchema} from "../schemas";
 import {sessionMiddleware} from "@/lib/session-middleware";
-import {DATABASE_ID, TASKS_ID, MEMBERS_ID, PROJECTS_ID} from "@/config";
-import {ID, Query} from "node-appwrite";
+import {DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID} from "@/config";
+import {AppwriteException, ID, Query} from "node-appwrite";
 import {z} from "zod";
-import {TaskStatus, Task, TaskPriority} from "../types";
+import {Task, TaskPriority, TaskStatus} from "../types";
 import {Project} from "@/features/projects/types";
 import {createAdminClient} from "@/lib/appwrite";
 import {sendNotificationToUser} from "@/lib/websocketServer";
+import {MemberRole} from "@/features/members/type";
 
 
 const app = new Hono();
@@ -77,7 +78,7 @@ app.get(
             query.push(Query.search("name", search));
         }
 
-        if (priority){ //todo admin only?
+        if (priority) { //todo admin only?
             console.log("priority:", priority);
             query.push(Query.equal("priority", priority));
         }
@@ -192,7 +193,7 @@ app.post(
             dueDate,
             assigneeId,
             position: newPosition,
-            priority
+            priority,
         });
 
         return c.json({data: task});
@@ -214,9 +215,10 @@ app.patch(
             workspaceId = task.workspaceId;
         });
 
+        let member;
         // check if user is member of workspace
         if (workspaceId) {
-            const member = await getMember({
+            member = await getMember({
                 databases,
                 workspaceId,
                 userId: user.$id,
@@ -225,7 +227,15 @@ app.patch(
             if (!member) {
                 return c.json({error: "Unauthorized"}, 401);
             }
+        } else {
+            return c.json({error: "Task not found"}, 404);
         }
+
+        //check if task is locked
+        // const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
+        // if (task.locked && member.role === MemberRole.MEMBER) { //as string here?????
+        //     return c.json({error: "Task is locked"}, 403);
+        // }
 
         // construct update task object
         const updateData: Partial<Task> = {};
@@ -294,3 +304,29 @@ app.delete(
     }
 );
 export default app;
+
+
+// async function getTaskById(
+//     id: string,
+//     c: Context,
+//     databases: Databases
+// ){
+//     try {
+//         // Return the task if found
+//         return await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, id);
+//     } catch (error) {
+//         // Log the error for debugging purposes
+//
+//         // Handle specific error cases
+//         if (error instanceof AppwriteException) {
+//             // @ts-ignore code exists
+//             if (error.response.code === 404) {
+//                 // Task not found
+//                 return c.json({ error: "Task not found" }, 404);
+//             }
+//         }
+//
+//         // Generic internal server error
+//         return c.json({ error: "Internal server error" }, 500);
+//     }
+// }
