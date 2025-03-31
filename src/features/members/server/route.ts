@@ -1,4 +1,4 @@
-import { DATABASE_ID, MEMBERS_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, WORKSPACES_ID } from "@/config";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
@@ -214,9 +214,12 @@ app.patch(
                         });
                     }
                 }
+
+                // Step 5: Update the workspaces table with the new admin's userId
+                await updateWorkspace(databases, workspaceId, { userId: member.userId });
             }
 
-            // Step 5: Update the member's role
+            // Step 6: Update the member's role
             await databases.updateDocument(DATABASE_ID, MEMBERS_ID, memberId, {
                 role, // Update the role field
             });
@@ -228,5 +231,25 @@ app.patch(
         }
     }
 );
+// Helper function to update workspace details
+const updateWorkspace = async (
+    databases: any,
+    workspaceId: string,
+    updates: { name?: string; imageUrl?: string; userId?: string }
+) => {
+    try {
+        // Fetch the workspace to ensure it exists
+        const workspace = await databases.getDocument(DATABASE_ID, WORKSPACES_ID, workspaceId);
+        if (!workspace) {
+            throw new Error("Workspace not found");
+        }
+
+        // Update the workspace document with the provided updates
+        return await databases.updateDocument(DATABASE_ID, WORKSPACES_ID, workspaceId, updates);
+    } catch (error) {
+        console.error("Error updating workspace:", error);
+        throw error;
+    }
+};
 
 export default app;
