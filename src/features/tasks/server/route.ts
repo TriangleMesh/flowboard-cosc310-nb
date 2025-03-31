@@ -162,7 +162,17 @@ app.post(
         const user = c.get("user");
         const databases = c.get("databases");
 
-        const {name, status, workspaceId, projectId, dueDate, assigneeId, priority, description, locked} = c.req.valid("json");
+        const {
+            name,
+            status,
+            workspaceId,
+            projectId,
+            dueDate,
+            assigneeId,
+            priority,
+            description,
+            locked
+        } = c.req.valid("json");
 
         const member = await getMember({
             databases,
@@ -210,7 +220,7 @@ app.patch(
     async (c) => {
         const user = c.get("user");
         const databases = c.get("databases");
-        const {name, status, dueDate, assigneeId, taskId, priority} = c.req.valid("json");
+        const {name, status, dueDate, assigneeId, taskId, priority, description, locked} = c.req.valid("json");
         let workspaceId: string = "";
 
         //get workspaceId from task
@@ -234,12 +244,6 @@ app.patch(
             return c.json({error: "Task not found"}, 404);
         }
 
-        //check if task is locked
-        // const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
-        // if (task.locked && member.role === MemberRole.MEMBER) { //as string here?????
-        //     return c.json({error: "Task is locked"}, 403);
-        // }
-
         // construct update task object
         const updateData: Partial<Task> = {};
         if (name !== undefined) updateData.name = name;
@@ -247,6 +251,24 @@ app.patch(
         if (dueDate !== undefined) updateData.dueDate = dueDate;
         if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
         if (priority !== undefined) updateData.priority = priority;
+        if (description !== undefined) updateData.description = description;
+        if (locked !== undefined) updateData.locked = locked;
+
+
+        //check if task is locked
+        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
+        if (task.locked && member.role === MemberRole.MEMBER) {
+            return c.json({error: "Task is locked"}, 403);
+        } else if (task.locked && member.role === MemberRole.ADMIN) {
+            //check if task lock is the only thing changed
+            if (Object.keys(updateData).length === 1 && updateData.locked === false) {
+                //update task
+                const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
+                return c.json({data: updatedTask});
+            } else {
+                return c.json({error: "Task is locked, please unlock before making changes"}, 403);
+            }
+        }
 
         //get userId by assigneeId
         let notificationUserId: string = "";
