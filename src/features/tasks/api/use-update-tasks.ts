@@ -18,8 +18,13 @@ export const useUpdateTask = () => {
             // @ts-ignore
             const response = await client.api.tasks["$patch"]({json});
 
+
             if (!response.ok) {
-                throw new Error("Failed to update task");
+                if (response.status === 403){
+                    toast.error("Task is locked");
+                    return;
+                }
+                toast.error("Failed to update task");
             }
             return await response.json();
         },
@@ -30,7 +35,6 @@ export const useUpdateTask = () => {
             queryClient.invalidateQueries({queryKey: ["task",data.$id]});
         },
         onError: () => {
-            toast.error("Failed to update task");
         },
     });
 };
