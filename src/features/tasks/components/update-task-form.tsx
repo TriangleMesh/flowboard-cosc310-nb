@@ -1,5 +1,5 @@
 import {MemberAvatar} from "@/features/members/components/member-avatar"; // TODO: FB-3025
-import {TaskStatus} from "../types";
+import {TaskPriority, TaskStatus} from "../types";
 import {ProjectAvatar} from "@/features/projects/components/project-avatar";
 import {
     Select,
@@ -19,12 +19,13 @@ import {cn} from "@/lib/utils";
 
 import {updateTaskSchema} from "@/features/tasks/schemas";
 import {useUpdateTask} from "@/features/tasks/api/use-update-tasks";
+import {Switch} from "@/components/ui/switch";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
     projectOptions: { id: string; name: string; imageUrl: string }[];
     memberOptions: { id: string; name: string }[];
-    initialValues: z.infer<typeof updateTaskSchema>; // 新增
+    initialValues: z.infer<typeof updateTaskSchema>;
 }
 
 export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initialValues}: CreateTaskFormProps) => {
@@ -36,7 +37,7 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
 
     const onSubmit = (values: z.infer<typeof updateTaskSchema>) => {
         mutate(
-            {json: {...values,}},
+            {json: {...values, taskId: initialValues.$id}},
             {
                 onSuccess: () => {
                     form.reset();
@@ -69,6 +70,21 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                         <FormLabel>Task Name</FormLabel>
                                         <FormControl>
                                             <Input {...field} placeholder="Enter task name"/>
+                                        </FormControl>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Task description Field */}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Task Description</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Enter task description"/>
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>
@@ -112,6 +128,34 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                                         </div>
                                                     </SelectItem>
                                                 ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Priority Field */}
+                            <FormField
+                                control={form.control}
+                                name="priority"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Priority</FormLabel>
+                                        <Select defaultValue={field.value} onValueChange={field.onChange}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select priority"/>
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value={TaskPriority.NULL}>No priority</SelectItem>
+                                                <SelectItem value={TaskPriority.LOW}>Low</SelectItem>
+                                                <SelectItem value={TaskPriority.MEDIUM_LOW}>Medium Low</SelectItem>
+                                                <SelectItem value={TaskPriority.MEDIUM}>Medium</SelectItem>
+                                                <SelectItem value={TaskPriority.MEDIUM_HIGH}>Medium High</SelectItem>
+                                                <SelectItem value={TaskPriority.HIGH}>High</SelectItem>
+                                                <SelectItem value={TaskPriority.CRITICAL}>Critical</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage/>
@@ -177,6 +221,29 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Locked Field */}
+                            <FormField
+                                control={form.control}
+                                name="locked"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Lock Status</FormLabel>
+                                        <FormControl>
+                                            {/* Use a Switch component for the toggle */}
+                                            <div className="flex items-center space-x-2">
+                                                <Switch
+                                                    checked={field.value} // Bind the current value of the field
+                                                    onCheckedChange={field.onChange} // Update the field value when toggled
+                                                />
+                                                <span>{field.value ? "Locked" : "Unlocked"}</span> {/* Optional: Display the state */}
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
                         </div>
 
                         <DottedSeparator className="py-7"/>
