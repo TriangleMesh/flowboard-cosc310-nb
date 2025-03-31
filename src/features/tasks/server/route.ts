@@ -260,12 +260,7 @@ app.patch(
         if (task.locked && member.role === MemberRole.MEMBER) {
             return c.json({error: "Task is locked"}, 403);
         } else if (task.locked && member.role === MemberRole.ADMIN) {
-            //check if task lock is the only thing changed
-            if (Object.keys(updateData).length === 1 && updateData.locked === false) {
-                //update task
-                const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
-                return c.json({data: updatedTask});
-            } else {
+            if (updateData.locked === undefined || updateData.locked === true) {
                 return c.json({error: "Task is locked, please unlock before making changes"}, 403);
             }
         }

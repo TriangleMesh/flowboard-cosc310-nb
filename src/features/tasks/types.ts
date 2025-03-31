@@ -9,13 +9,13 @@ export enum TaskStatus {
 }
 
 export enum TaskPriority {
+    NULL = "NULL",
     LOW = "LOW",
     MEDIUM_LOW = "MEDIUM_LOW",
     MEDIUM = "MEDIUM",
     MEDIUM_HIGH = "MEDIUM_HIGH",
     HIGH = "HIGH",
     CRITICAL = "CRITICAL",
-    NULL = "NULL",
 }
 
 
