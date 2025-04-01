@@ -1,4 +1,4 @@
-//source: https://github.com/sersavan/shadcn-multi-select-component
+//source: https://github.com/sersavan/shadcn-multi-select-component, with customizations by qwen.ai and Germain So
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
@@ -28,10 +28,6 @@ import {
     CommandSeparator,
 } from "@/components/ui/command";
 
-/**
- * Variants for the multi-select component to handle different styles.
- * Uses class-variance-authority (cva) to define different styles based on "variant" prop.
- */
 const multiSelectVariants = cva(
     "m-1 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300",
     {
@@ -52,70 +48,23 @@ const multiSelectVariants = cva(
     }
 );
 
-/**
- * Props for MultiSelect component
- */
 interface MultiSelectProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>,
         VariantProps<typeof multiSelectVariants> {
-    /**
-     * An array of option objects to be displayed in the multi-select component.
-     * Each option object has a label, value, and an optional icon.
-     */
     options: {
-        /** The text to display for the option. */
         label: string;
-        /** The unique value associated with the option. */
         value: string;
-        /** Optional icon component to display alongside the option. */
         icon?: React.ComponentType<{ className?: string }>;
     }[];
-
-    /**
-     * Callback function triggered when the selected values change.
-     * Receives an array of the new selected values.
-     */
     onValueChange: (value: string[]) => void;
-
-    /** The default selected values when the component mounts. */
     defaultValue?: string[];
-
-    /**
-     * Placeholder text to be displayed when no values are selected.
-     * Optional, defaults to "Select options".
-     */
     placeholder?: string;
-
-    /**
-     * Animation duration in seconds for the visual effects (e.g., bouncing badges).
-     * Optional, defaults to 0 (no animation).
-     */
     animation?: number;
-
-    /**
-     * Maximum number of items to display. Extra selected items will be summarized.
-     * Optional, defaults to 3.
-     */
     maxCount?: number;
-
-    /**
-     * The modality of the popover. When set to true, interaction with outside elements
-     * will be disabled and only popover content will be visible to screen readers.
-     * Optional, defaults to false.
-     */
     modalPopover?: boolean;
-
-    /**
-     * If true, renders the multi-select component as a child of another component.
-     * Optional, defaults to false.
-     */
     asChild?: boolean;
-
-    /**
-     * Additional class names to apply custom styles to the multi-select component.
-     * Optional, can be used to add custom styles.
-     */
     className?: string;
+    type?: "editForm" | "dataFilters"; // Added type prop
 }
 
 export const MultiSelect = React.forwardRef<
@@ -134,6 +83,7 @@ export const MultiSelect = React.forwardRef<
             modalPopover = false,
             asChild = false,
             className,
+            type, // Added type prop
             ...props
         },
         ref
@@ -200,8 +150,11 @@ export const MultiSelect = React.forwardRef<
                         variant="outline"
                         size="lg"
                         className={cn(
-                            "w-full justify-start text-left font-normal px-3",
-                            "text-muted-foreground",
+                            type === "editForm"
+                                ? "w-full justify-start text-left font-normal px-3 text-muted-foreground"
+                                : type === "dataFilters"
+                                ? "flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-full lg:w-auto h-8"
+                                : "w-full justify-start text-left font-normal px-3 text-muted-foreground",
                             className
                         )}
                     >
@@ -271,9 +224,9 @@ export const MultiSelect = React.forwardRef<
                             </div>
                         ) : (
                             <div className="flex items-center justify-between w-full mx-auto">
-                <span className="text-sm text-muted-foreground mx-3">
-                  {placeholder}
-                </span>
+                                <span className="text-sm text-muted-foreground mx-3">
+                                    {placeholder}
+                                </span>
                                 <ChevronDown className="h-4 cursor-pointer text-muted-foreground mx-2" />
                             </div>
                         )}
@@ -363,15 +316,6 @@ export const MultiSelect = React.forwardRef<
                         </CommandList>
                     </Command>
                 </PopoverContent>
-                {animation > 0 && selectedValues.length > 0 && (
-                    <WandSparkles
-                        className={cn(
-                            "cursor-pointer my-2 text-foreground bg-background w-3 h-3",
-                            isAnimating ? "" : "text-muted-foreground"
-                        )}
-                        onClick={() => setIsAnimating(!isAnimating)}
-                    />
-                )}
             </Popover>
         );
     }

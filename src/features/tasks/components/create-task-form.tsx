@@ -155,12 +155,12 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
                                                     label: member.name,
                                                     icon: () => <MemberAvatar className="size-5" name={member.name} />
                                                 }))}
+                                                type="editForm"
                                                 value={field.value || []}
                                                 onValueChange={field.onChange}
                                                 placeholder="Select assignees"
                                                 variant="inverted"
                                                 animation={2}
-                                                maxCount={3}
                                                 renderOption={(member) => (
                                                     <div className="flex items-center gap-x-2" key={member.id}>
                                                         <MemberAvatar className="size-6" name={member.name} />

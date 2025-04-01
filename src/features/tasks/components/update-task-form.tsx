@@ -161,9 +161,9 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                                 value={field.value || []}
                                                 onValueChange={field.onChange}
                                                 placeholder="Select assignees"
+                                                type = "editForm"
                                                 variant="inverted"
                                                 animation={2}
-                                                maxCount={3}
                                                 defaultValue={initialValues.assigneesId}
                                                 renderOption={(member) => (
                                                     <div className="flex items-center gap-x-2" key={member.id}>
