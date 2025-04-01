@@ -27,5 +27,6 @@ export type Task = Models.Document & {
     position: number;
     dueDate: string;
     priority: TaskPriority;
+    assigneesId: string[];
 }
     
