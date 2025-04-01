@@ -22,6 +22,7 @@ import {useUpdateTask} from "@/features/tasks/api/use-update-tasks";
 import {Switch} from "@/components/ui/switch";
 import {useCurrent} from "@/features/auth/api/use-current";
 import {useGetWorkspace} from "@/features/workspaces/api/use-get-workspace-by-id";
+import {DatePicker} from "@/components/date-picker";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -106,7 +107,7 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                     <FormItem>
                                         <FormLabel>Due date</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="Enter due date yyyy-mm-dd"/>
+                                            <DatePicker {...field} />
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>

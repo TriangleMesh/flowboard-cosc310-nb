@@ -11,16 +11,6 @@ interface UpdateTaskFormWrapperProps {
     taskId: string;
 }
 
-function timeToDateString(timestamp: Date) {
-    let date = new Date(timestamp);
-
-    const year = date.getUTCFullYear(); // Get the year in UTC
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-    const day = String(date.getUTCDate()).padStart(2, '0'); // Get the day of the month
-
-    return `${year}-${month}-${day}`;
-}
-
 export const UpdateTaskFormWrapper = async ({onCancel,taskId}: UpdateTaskFormWrapperProps) => {
     const workspaceId = useWorkspaceId() as string;
 
@@ -54,8 +44,6 @@ export const UpdateTaskFormWrapper = async ({onCancel,taskId}: UpdateTaskFormWra
     if (!initialValues){
         return null;
     }
-
-    initialValues.dueDate = timeToDateString(initialValues.dueDate as Date);
 
     return (
         <UpdateTaskForm
