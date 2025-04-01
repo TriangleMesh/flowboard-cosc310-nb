@@ -23,6 +23,7 @@ import {DottedSeparator} from "@/components/ui/dotted-separator";
 import {cn} from "@/lib/utils";
 import {Switch} from "@/components/ui/switch";
 import {DatePicker} from "@/components/date-picker";
+import {MultiSelect} from "@/components/ui/multi-select";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -104,7 +105,6 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
                                     <FormItem>
                                         <FormLabel>Due date</FormLabel>
                                         <FormControl>
-                                            {/*<Input {...field} placeholder="Enter due date yyyy-mm-dd"/>*/}
                                             <DatePicker {...field} />
                                         </FormControl>
                                         <FormMessage/>
@@ -137,6 +137,38 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
                                             </SelectContent>
                                         </Select>
                                         <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="assigneesId" // Changed to "assigneeIds" for multiple assignees
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Assignees</FormLabel>
+                                        <FormControl>
+                                            <MultiSelect
+                                                options={memberOptions.map((member) => ({
+                                                    value: member.id,
+                                                    label: member.name,
+                                                    icon: () => <MemberAvatar className="size-5" name={member.name} />
+                                                }))}
+                                                value={field.value || []}
+                                                onValueChange={field.onChange}
+                                                placeholder="Select assignees"
+                                                variant="inverted"
+                                                animation={2}
+                                                maxCount={3}
+                                                renderOption={(member) => (
+                                                    <div className="flex items-center gap-x-2" key={member.id}>
+                                                        <MemberAvatar className="size-6" name={member.name} />
+                                                        {member.name}
+                                                    </div>
+                                                )}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
