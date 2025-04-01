@@ -115,35 +115,6 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                 )}
                             />
 
-                            {/* Assignee Field */}
-                            <FormField
-                                control={form.control}
-                                name="assigneeId"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Assignee</FormLabel>
-                                        <Select defaultValue={field.value} onValueChange={field.onChange}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select assignee"/>
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {memberOptions.map((member) => (
-                                                    <SelectItem key={member.id} value={member.id}>
-                                                        <div className="flex items-center gap-x-2">
-                                                            <MemberAvatar className="size-6" name={member.name}/>
-                                                            {member.name}
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-
                             {/* Assignees Field */}
                             <FormField
                                 control={form.control}
