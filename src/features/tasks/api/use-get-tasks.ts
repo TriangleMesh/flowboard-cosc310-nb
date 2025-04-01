@@ -9,6 +9,7 @@ interface UseGetTasksProps {
     assigneeId?: string | null;
     dueDate?: string | null;
     priority?: TaskPriority | null;
+    assigneesId?: string[] | null;
 }
 
 export const useGetTasks = ({
@@ -17,7 +18,8 @@ export const useGetTasks = ({
                                 status,
                                 assigneeId,
                                 dueDate,
-                                priority
+                                priority,
+                                assigneesId
                             }: UseGetTasksProps) => {
     return useQuery({
         queryKey: [
@@ -28,6 +30,7 @@ export const useGetTasks = ({
             assigneeId,
             dueDate,
             priority,
+            assigneesId
         ],
         queryFn: async () => {
             try {
@@ -39,6 +42,7 @@ export const useGetTasks = ({
                         assigneeId: assigneeId ?? undefined,
                         dueDate: dueDate ?? undefined,
                         priority: priority ?? undefined,
+                        assigneesId: assigneesId ?? undefined,
                     },
                 });
 
