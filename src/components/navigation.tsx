@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { SettingsIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { GoCheckCircle, GoCheckCircleFill, GoHome, GoHomeFill } from "react-icons/go";
+import React from "react";
 
 const routes = [
     {
@@ -12,12 +13,6 @@ const routes = [
         href: "", // Changed to avoid URL issues
         icon: GoHome,
         activeIcon: GoHomeFill,
-    },    
-    {
-        label: "My Tasks",
-        href: "/tasks",
-        icon: GoCheckCircle,
-        activeIcon: GoCheckCircleFill,
     },
     {
         label: "Settings",
@@ -30,6 +25,12 @@ const routes = [
         href: "/members",
         icon: UsersIcon,
         activeIcon: UsersIcon,
+    },
+    {
+        label: "Admin Dashboard",
+        href: "/admin-dashboard",
+        icon: GoCheckCircle,
+        activeIcon: GoCheckCircleFill,
     },
 ];
 
