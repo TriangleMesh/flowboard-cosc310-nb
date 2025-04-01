@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Droppable, Draggable, DragDropContext } from "react-beautiful-dnd";
 import { Task, TaskStatus } from "@/features/tasks/types";
 import { useUpdateTask } from "../api/use-update-tasks";
+import {snakeCaseToTitleCase} from "@/lib/utils";
 
 interface KanbanViewProps {
     tasks: Task[];
@@ -95,7 +96,7 @@ const KanbanView = ({ tasks }: KanbanViewProps) => {
                                 className="flex-1 min-w-[200px] bg-gray-100 rounded-lg p-4 shadow-sm m-2"
                             >
                                 {/* Status title */}
-                                <h3 className="text-lg font-semibold mb-4">{status.toString().replaceAll("_"," ")}</h3>
+                                <h3 className="text-lg font-semibold mb-4">{snakeCaseToTitleCase(status as string)}</h3>
                                 {/* Task list */}
                                 {tasks.map((task, index) => (
                                     <Draggable
