@@ -273,7 +273,7 @@ app.patch(
         }
 
         //prevent normal member from changing task lock status
-        if (updateData.locked !== originalTask.locked && member.role === MemberRole.MEMBER) {
+        if (updateData.locked !== undefined && updateData.locked !== originalTask.locked && member.role === MemberRole.MEMBER) {
             return c.json({error: "Only admin can change originalTask lock status"}, 403);
         }
 
