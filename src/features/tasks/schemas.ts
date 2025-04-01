@@ -43,7 +43,7 @@ export const updateTaskSchema = z.object({
     projectId: z.string().optional(),
     description: z.string().optional(),
     priority: z.nativeEnum(TaskPriority).nullable().optional().default(TaskPriority.NULL),
-    locked: z.boolean().optional().default(false),
+    locked: z.boolean().optional(),
     assigneesId: z.array(z.string().trim().min(1, "Required")).optional()
 }).refine((data) => {
     return Object.keys(data).length > 0;

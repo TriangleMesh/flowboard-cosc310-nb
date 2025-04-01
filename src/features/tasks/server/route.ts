@@ -264,7 +264,7 @@ app.patch(
         } = c.req.valid("json");
         let workspaceId: string = "";
 
-        //get workspaceId from task
+        //get workspaceId from originalTask
         await databases.getDocument(DATABASE_ID, TASKS_ID, taskId).then((task) => {
             workspaceId = task.workspaceId;
         });
@@ -285,7 +285,7 @@ app.patch(
             return c.json({error: "Task not found"}, 404);
         }
 
-        // construct update task object
+        // construct update originalTask object
         const updateData: Partial<Task> = {};
         if (name !== undefined) updateData.name = name;
         if (status !== undefined) updateData.status = status;
@@ -301,18 +301,19 @@ app.patch(
         }
 
 
-        //check if task is locked
-        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
-        if (task.locked && member.role === MemberRole.MEMBER) {
+        //check if originalTask is locked
+        const originalTask = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
+        if (originalTask.locked && member.role === MemberRole.MEMBER) {
             return c.json({error: "Task is locked"}, 403);
-        } else if (task.locked && member.role === MemberRole.ADMIN) {
+        } else if (originalTask.locked && member.role === MemberRole.ADMIN) {
             if (updateData.locked === undefined || updateData.locked === true) {
                 return c.json({error: "Task is locked, please unlock before making changes"}, 403);
             }
         }
 
-        if (updateData.locked !== undefined && member.role === MemberRole.MEMBER) {
-            return c.json({error: "Only admin can change task lock status"}, 403);
+        //prevent normal member from changing task lock status
+        if (updateData.locked !== originalTask.locked && member.role === MemberRole.MEMBER) {
+            return c.json({error: "Only admin can change originalTask lock status"}, 403);
         }
 
         //get userId by assigneeId
@@ -339,7 +340,7 @@ app.patch(
             }
         }
 
-        // update task
+        // update originalTask
         const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
 
         sendNotificationToUser(notificationUserId, {type: 'system', message: `${name || taskName} has been updated.`});
