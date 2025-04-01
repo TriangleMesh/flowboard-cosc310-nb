@@ -41,7 +41,7 @@ app.get(
 
         // Get user details for each member
         const { users } = await createAdminClient();
-        
+
         const populatedMembers = await Promise.all(
             members.documents.map(async (member) => {
                 try {
@@ -80,13 +80,15 @@ app.delete(
     async (c) => {
         const databases = c.get("databases");
         const user = c.get("user");
-        const { workspaceId, memberId } = c.req.valid("query");
 
-        if (!user){
-            return c.json({ error: "Unauthorized" }, 401);
+        // Check if the session is valid
+        if (!user) {
+            return c.json({ error: "Unauthorized: Invalid session key" }, 401);
         }
 
         try {
+            const { workspaceId, memberId } = c.req.valid("query");
+
             // Step 1: Fetch the member document to check if it exists and belongs to the workspace
             console.log("Received request:", { workspaceId, memberId });
 
@@ -107,7 +109,7 @@ app.delete(
             );
 
             if (userMembership.documents.length === 0) {
-                return c.json({ error: "Unauthorized" }, 401);
+                return c.json({ error: "Unauthorized: User is not a member of this workspace" }, 401);
             }
 
             // Step 3: Delete the member
