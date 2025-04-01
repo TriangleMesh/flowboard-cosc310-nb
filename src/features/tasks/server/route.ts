@@ -24,7 +24,6 @@ app.get(
         z.object({
             workspaceId: z.string(),
             projectId: z.string().nullish(),
-            assigneeId: z.string().nullish(),
             status: z.nativeEnum(TaskStatus).nullish(),
             search: z.string().nullish(),
             dueDate: z.string().nullish(),
@@ -48,7 +47,6 @@ app.get(
             projectId,
             status,
             search,
-            assigneeId,
             dueDate,
             priority,
             assigneesId
@@ -77,11 +75,6 @@ app.get(
         if (status) {
             console.log("status:", status);
             query.push(Query.equal("status", status));
-        }
-
-        if (assigneeId) {
-            console.log("assigneeId:", assigneeId);
-            query.push(Query.equal("assigneeId", assigneeId));
         }
 
         if (dueDate) {
@@ -114,7 +107,6 @@ app.get(
         const tasks = await databases.listDocuments<Task>(DATABASE_ID, TASKS_ID, query);
 
         const projectIds = tasks.documents.map((task) => task.projectId);
-        const assigneeIds = tasks.documents.map((task) => task.assigneeId);
 
         const projects = await databases.listDocuments<Project>(
             DATABASE_ID,
@@ -122,41 +114,14 @@ app.get(
             projectIds.length > 0 ? [Query.contains("$id", projectIds)] : []
         );
 
-        const members = await databases.listDocuments(
-            DATABASE_ID,
-            MEMBERS_ID,
-            assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : []
-        );
-
-        const assignees = await Promise.all(
-            members.documents.map(async (member) => {
-                try {
-                    const user = await users.get(member.userId);
-                    return {
-                        ...member,
-                        name: user.name,
-                        email: user.email,
-                    };
-                } catch (error) {
-                    // If we can't get user data, use the member's name or a fallback
-                    return {
-                        ...member,
-                        name: member.name || `User ${member.userId.substring(0, 8)}`,
-                        email: "unknown@example.com",
-                    };
-                }
-            })
-        );
 
         //todo update here
         const populatedTasks = tasks.documents.map((task) => {
             const project = projects.documents.find((proj) => proj.$id === task.projectId);
-            const assignee = assignees.find((asg) => asg.$id === task.assigneeId);
 
             return {
                 ...task,
                 project,
-                assignee,
             };
         });
 
@@ -197,7 +162,6 @@ app.post(
             workspaceId,
             projectId,
             dueDate,
-            assigneeId,
             priority,
             description,
             locked,
@@ -232,7 +196,6 @@ app.post(
             workspaceId,
             projectId,
             dueDate,
-            assigneeId,
             position: newPosition,
             priority,
             description,
@@ -255,7 +218,6 @@ app.patch(
             name,
             status,
             dueDate,
-            assigneeId,
             taskId,
             priority,
             description,
@@ -264,7 +226,7 @@ app.patch(
         } = c.req.valid("json");
         let workspaceId: string = "";
 
-        //get workspaceId from task
+        //get workspaceId from originalTask
         await databases.getDocument(DATABASE_ID, TASKS_ID, taskId).then((task) => {
             workspaceId = task.workspaceId;
         });
@@ -285,12 +247,11 @@ app.patch(
             return c.json({error: "Task not found"}, 404);
         }
 
-        // construct update task object
+        // construct update originalTask object
         const updateData: Partial<Task> = {};
         if (name !== undefined) updateData.name = name;
         if (status !== undefined) updateData.status = status;
         if (dueDate !== undefined) updateData.dueDate = dueDate;
-        if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
         if (priority !== undefined) {
             updateData.priority = priority;
         }
@@ -301,26 +262,19 @@ app.patch(
         }
 
 
-        //check if task is locked
-        const task = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
-        if (task.locked && member.role === MemberRole.MEMBER) {
+        //check if originalTask is locked
+        const originalTask = await databases.getDocument<Task>(DATABASE_ID, TASKS_ID, taskId);
+        if (originalTask.locked && member.role === MemberRole.MEMBER) {
             return c.json({error: "Task is locked"}, 403);
-        } else if (task.locked && member.role === MemberRole.ADMIN) {
+        } else if (originalTask.locked && member.role === MemberRole.ADMIN) {
             if (updateData.locked === undefined || updateData.locked === true) {
                 return c.json({error: "Task is locked, please unlock before making changes"}, 403);
             }
         }
 
-        if (updateData.locked !== undefined && member.role === MemberRole.MEMBER) {
-            return c.json({error: "Only admin can change task lock status"}, 403);
-        }
-
-        //get userId by assigneeId
-        let notificationUserId: string = "";
-        if (assigneeId !== undefined) {
-            await databases.getDocument(DATABASE_ID, MEMBERS_ID, assigneeId).then((member) => {
-                notificationUserId = member.userId;
-            });
+        //prevent normal member from changing task lock status
+        if (updateData.locked !== undefined && updateData.locked !== originalTask.locked && member.role === MemberRole.MEMBER) {
+            return c.json({error: "Only admin can change originalTask lock status"}, 403);
         }
 
         // get taskName by id
@@ -329,7 +283,7 @@ app.patch(
             taskName = task.name;
         });
 
-        //new multiple assignees
+        //multiple assignees get userId
         const notificationUserIds: string[] = [];
         if (assigneesId !== undefined) {
             for (const assigneeId of assigneesId) {
@@ -339,15 +293,12 @@ app.patch(
             }
         }
 
-        // update task
+        // update originalTask
         const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
-
-        sendNotificationToUser(notificationUserId, {type: 'system', message: `${name || taskName} has been updated.`});
 
         for (const assigneeId of notificationUserIds) {
             sendNotificationToUser(assigneeId, {type: 'system', message: `Task ${name || taskName} has been updated.`});
         }
-
 
         return c.json({data: updatedTask});
     }

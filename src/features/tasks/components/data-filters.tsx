@@ -14,6 +14,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {MemberAvatar} from "@/features/members/components/member-avatar";
+import {MultiSelect} from "@/components/ui/multi-select";
 
 interface DataFiltersProps {
     hideProjectFilter?: boolean;
@@ -22,7 +24,7 @@ interface DataFiltersProps {
 export const DataFilters = ({hideProjectFilter}: DataFiltersProps) => {
     const workspaceId = useWorkspaceId();
     const {data: projects, isLoading: isLoadingProjects} = useGetProjects({workspaceId});
-    const {data: members, isLoading: isLoadingMembers} = useGetMembers({workspaceId});
+    const {data: members, isLoading: isLoadingMembers} = useGetMembers({workspaceId})
 
     const isLoading = isLoadingProjects || isLoadingMembers;
 
@@ -36,15 +38,16 @@ export const DataFilters = ({hideProjectFilter}: DataFiltersProps) => {
         label: member.name,
     }));
 
-    const [{status, assigneeId, projectId, dueDate, priority}, setFilters] = useTaskFilters();
+    const [{status, assigneeId, projectId, dueDate, priority, assigneesId}, setFilters] = useTaskFilters();
 
     const onStatusChange = (value: string) => {
         setFilters({status: value === "all" ? null : (value as TaskStatus)});
     };
 
-    const onAssigneeChange = (value: string) => {
-        setFilters({assigneeId: value === "all" ? null : value});
+    const onAssigneesChange = (value: string[]) => {
+        setFilters({ assigneesId: value.length === 0 ? null : value });
     };
+
 
     const onProjectChange = (value: string) => {
         setFilters({projectId: value === "all" ? null : value});
@@ -77,24 +80,25 @@ export const DataFilters = ({hideProjectFilter}: DataFiltersProps) => {
                 </SelectContent>
             </Select>
 
-            {/* Assignee Filter */}
-            <Select defaultValue={assigneeId ?? undefined} onValueChange={onAssigneeChange}>
-                <SelectTrigger className="w-full lg:w-auto h-8">
-                    <div className="flex items-center">
-                        <UserIcon className="size-4 mr-2"/>
-                        <SelectValue placeholder="All assignees"/>
+            <MultiSelect
+                options={memberOptions.map((member) => ({
+                    value: member.value,
+                    label: member.label,
+                    icon: () => <MemberAvatar className="size-5" name={member.label as string} />
+                }))}
+                type="dataFilters"
+                placeholder="Select assignees"
+                variant="inverted"
+                defaultValue={assigneesId ?? undefined}
+                animation={2}
+                onValueChange={onAssigneesChange}
+                renderOption={(option) => (
+                    <div className="flex items-center gap-x-2" key={option.value}>
+                        {option.label}
                     </div>
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All assignees</SelectItem>
-                    <SelectSeparator/>
-                    {memberOptions?.map((member) => (
-                        <SelectItem key={member.value} value={member.value}>
-                            {member.label}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+                )}
+            />
+
 
             {/* Project Filter (if not hidden) */}
             {!hideProjectFilter && (

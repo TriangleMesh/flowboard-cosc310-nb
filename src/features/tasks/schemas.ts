@@ -6,17 +6,7 @@ export const createTaskSchema = z.object({
         status: z.nativeEnum(TaskStatus, {required_error: "Required"}),
         workspaceId: z.string().trim().min(1, "Required"),
         projectId: z.string().trim().min(1, "Required"),
-        dueDate: z.string().refine((value) => { //validate by trying to create a date object
-            try {
-                const date = new Date(value);
-                return !isNaN(date.getDate());
-            } catch (error) {
-                return false;
-            }
-        }, {
-            message: "Invalid date format",
-        }),
-        assigneeId: z.string().trim().min(1, "Required"),
+        dueDate: z.coerce.date(),
         description: z.string().optional(),
         //make the following optional so that no need to change existing test cases
         priority: z.nativeEnum(TaskPriority, {required_error: "Required"}).optional().default(TaskPriority.NULL),
@@ -27,24 +17,14 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = z.object({
     taskId: z.string().min(1, "Required"),
-    name: z.string().min(1, "Required").optional(),
-    status: z.nativeEnum(TaskStatus, {required_error: "Required"}).optional(),
-    dueDate: z.string().refine((value) => {
-        try {
-            const date = new Date(value);
-            return !isNaN(date.getDate());
-        } catch (error) {
-            return false;
-        }
-    }, {
-        message: "Invalid date format",
-    }).optional(),
-    assigneeId: z.string().trim().min(1, "Required").optional(),
+    name: z.string().min(1, "Required"),
+    status: z.nativeEnum(TaskStatus, {required_error: "Required"}),
+    dueDate: z.coerce.date(),
     projectId: z.string().optional(),
-    description: z.string().optional(),
+    description: z.string().optional().nullish(),
     priority: z.nativeEnum(TaskPriority).nullable().optional().default(TaskPriority.NULL),
-    locked: z.boolean().optional().default(false),
-    assigneesId: z.array(z.string().trim().min(1, "Required")).optional()
+    locked: z.boolean().optional().nullish(),
+    assigneesId: z.array(z.string().trim().min(1, "Required")).optional().nullish()
 }).refine((data) => {
     return Object.keys(data).length > 0;
 }, {

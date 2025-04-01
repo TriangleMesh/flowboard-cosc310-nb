@@ -22,6 +22,8 @@ import {Button} from "@/components/ui/button";
 import {DottedSeparator} from "@/components/ui/dotted-separator";
 import {cn} from "@/lib/utils";
 import {Switch} from "@/components/ui/switch";
+import {DatePicker} from "@/components/date-picker";
+import {MultiSelect} from "@/components/ui/multi-select";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -103,38 +105,42 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
                                     <FormItem>
                                         <FormLabel>Due date</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="Enter due date yyyy-mm-dd"/>
+                                            <DatePicker {...field} />
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>
                                 )}
                             />
 
-                            {/* Assignee Field */}
+                            {/* Assignees Field */}
                             <FormField
                                 control={form.control}
-                                name="assigneeId"
-                                render={({field}) => (
+                                name="assigneesId" // Changed to "assigneeIds" for multiple assignees
+                                render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Assignee</FormLabel>
-                                        <Select defaultValue={field.value} onValueChange={field.onChange}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select assignee"/>
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {memberOptions.map((member) => (
-                                                    <SelectItem key={member.id} value={member.id}>
-                                                        <div className="flex items-center gap-x-2">
-                                                            <MemberAvatar className="size-6" name={member.name}/>
-                                                            {member.name}
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage/>
+                                        <FormLabel>Assignees</FormLabel>
+                                        <FormControl>
+                                            <MultiSelect
+                                                options={memberOptions.map((member) => ({
+                                                    value: member.id,
+                                                    label: member.name,
+                                                    icon: () => <MemberAvatar className="size-5" name={member.name} />
+                                                }))}
+                                                type="editForm"
+                                                value={field.value || []}
+                                                onValueChange={field.onChange}
+                                                placeholder="Select assignees"
+                                                variant="inverted"
+                                                animation={2}
+                                                renderOption={(member) => (
+                                                    <div className="flex items-center gap-x-2" key={member.id}>
+                                                        <MemberAvatar className="size-6" name={member.name} />
+                                                        {member.name}
+                                                    </div>
+                                                )}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
