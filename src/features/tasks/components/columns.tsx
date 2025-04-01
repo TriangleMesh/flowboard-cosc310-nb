@@ -73,7 +73,7 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             );
         },
-    },, {
+    }, {
         accessorKey: "assigneesId",
         header: ({ column }) => {
             return (
