@@ -29,14 +29,30 @@ app.get(
             search: z.string().nullish(),
             dueDate: z.string().nullish(),
             priority: z.nativeEnum(TaskPriority).nullish(),
-        })
+            assigneesId: z
+                .union([
+                    z.string().array(),
+                    z.string(),
+                    z.null(),
+                ])
+                .nullish()
+            })
     ),
     async (c) => {
         const {users} = await createAdminClient(); // UPDATE: added within createAdminClient get Users()
         const databases = c.get("databases");
         const user = c.get("user");
 
-        const {workspaceId, projectId, status, search, assigneeId, dueDate, priority} = c.req.valid("query");
+        const {
+            workspaceId,
+            projectId,
+            status,
+            search,
+            assigneeId,
+            dueDate,
+            priority,
+            assigneesId
+        } = c.req.valid("query");
 
         const member = await getMember({
             databases,
@@ -83,6 +99,18 @@ app.get(
             query.push(Query.equal("priority", priority));
         }
 
+        if (assigneesId) {
+            console.log("assigneesId:", assigneesId);
+            // Assuming assigneesId is an array
+            if (Array.isArray(assigneesId)) {
+                for (const assigneeId of assigneesId) {
+                    query.push(Query.contains("assigneesId", assigneeId));
+                }
+            } else {
+                query.push(Query.contains("assigneesId", assigneesId));
+            }
+        }
+
         const tasks = await databases.listDocuments<Task>(DATABASE_ID, TASKS_ID, query);
 
         const projectIds = tasks.documents.map((task) => task.projectId);
@@ -120,6 +148,7 @@ app.get(
             })
         );
 
+        //todo update here
         const populatedTasks = tasks.documents.map((task) => {
             const project = projects.documents.find((proj) => proj.$id === task.projectId);
             const assignee = assignees.find((asg) => asg.$id === task.assigneeId);
@@ -171,7 +200,8 @@ app.post(
             assigneeId,
             priority,
             description,
-            locked
+            locked,
+            assigneesId
         } = c.req.valid("json");
 
         const member = await getMember({
@@ -207,6 +237,7 @@ app.post(
             priority,
             description,
             locked,
+            assigneesId
         });
 
         return c.json({data: task});
@@ -220,7 +251,17 @@ app.patch(
     async (c) => {
         const user = c.get("user");
         const databases = c.get("databases");
-        const {name, status, dueDate, assigneeId, taskId, priority, description, locked} = c.req.valid("json");
+        const {
+            name,
+            status,
+            dueDate,
+            assigneeId,
+            taskId,
+            priority,
+            description,
+            locked,
+            assigneesId
+        } = c.req.valid("json");
         let workspaceId: string = "";
 
         //get workspaceId from task
@@ -250,11 +291,14 @@ app.patch(
         if (status !== undefined) updateData.status = status;
         if (dueDate !== undefined) updateData.dueDate = dueDate;
         if (assigneeId !== undefined) updateData.assigneeId = assigneeId;
-        if (priority !== undefined) { // @ts-ignore
+        if (priority !== undefined) {
             updateData.priority = priority;
         }
         if (description !== undefined) updateData.description = description;
         if (locked !== undefined) updateData.locked = locked;
+        if (assigneesId !== undefined) {
+            updateData.assigneesId = assigneesId;
+        }
 
 
         //check if task is locked
@@ -285,10 +329,25 @@ app.patch(
             taskName = task.name;
         });
 
+        //new multiple assignees
+        const notificationUserIds: string[] = [];
+        if (assigneesId !== undefined) {
+            for (const assigneeId of assigneesId) {
+                await databases.getDocument(DATABASE_ID, MEMBERS_ID, assigneeId).then((member) => {
+                    notificationUserIds.push(member.userId);
+                });
+            }
+        }
+
         // update task
         const updatedTask = await databases.updateDocument(DATABASE_ID, TASKS_ID, taskId, updateData);
 
         sendNotificationToUser(notificationUserId, {type: 'system', message: `${name || taskName} has been updated.`});
+
+        for (const assigneeId of notificationUserIds) {
+            sendNotificationToUser(assigneeId, {type: 'system', message: `Task ${name || taskName} has been updated.`});
+        }
+
 
         return c.json({data: updatedTask});
     }
