@@ -23,6 +23,7 @@ import {Switch} from "@/components/ui/switch";
 import {useCurrent} from "@/features/auth/api/use-current";
 import {useGetWorkspace} from "@/features/workspaces/api/use-get-workspace-by-id";
 import {DatePicker} from "@/components/date-picker";
+import {MultiSelect} from "@/components/ui/multi-select";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -139,6 +140,40 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                             </SelectContent>
                                         </Select>
                                         <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Assignees Field */}
+                            <FormField
+                                control={form.control}
+                                name="assigneesId" // Changed to "assigneeIds" for multiple assignees
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Assignees</FormLabel>
+                                        <FormControl>
+                                            <MultiSelect
+                                                options={memberOptions.map((member) => ({
+                                                    value: member.id,
+                                                    label: member.name,
+                                                    icon: () => <MemberAvatar className="size-5" name={member.name} />
+                                                }))}
+                                                value={field.value || []}
+                                                onValueChange={field.onChange}
+                                                placeholder="Select assignees"
+                                                variant="inverted"
+                                                animation={2}
+                                                maxCount={3}
+                                                defaultValue={initialValues.assigneesId}
+                                                renderOption={(member) => (
+                                                    <div className="flex items-center gap-x-2" key={member.id}>
+                                                        <MemberAvatar className="size-6" name={member.name} />
+                                                        {member.name}
+                                                    </div>
+                                                )}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
