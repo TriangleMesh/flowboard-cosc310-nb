@@ -22,6 +22,7 @@ import {Button} from "@/components/ui/button";
 import {DottedSeparator} from "@/components/ui/dotted-separator";
 import {cn} from "@/lib/utils";
 import {Switch} from "@/components/ui/switch";
+import {DatePicker} from "@/components/date-picker";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -103,7 +104,8 @@ export const CreateTaskForm = ({onCancel, projectOptions, memberOptions}: Create
                                     <FormItem>
                                         <FormLabel>Due date</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="Enter due date yyyy-mm-dd"/>
+                                            {/*<Input {...field} placeholder="Enter due date yyyy-mm-dd"/>*/}
+                                            <DatePicker {...field} />
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>
