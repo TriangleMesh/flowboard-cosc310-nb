@@ -17,14 +17,14 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = z.object({
     taskId: z.string().min(1, "Required"),
-    name: z.string().min(1, "Required").optional(),
-    status: z.nativeEnum(TaskStatus, {required_error: "Required"}).optional(),
+    name: z.string().min(1, "Required"),
+    status: z.nativeEnum(TaskStatus, {required_error: "Required"}),
     dueDate: z.coerce.date(),
     projectId: z.string().optional(),
-    description: z.string().optional(),
+    description: z.string().optional().nullish(),
     priority: z.nativeEnum(TaskPriority).nullable().optional().default(TaskPriority.NULL),
-    locked: z.boolean().optional(),
-    assigneesId: z.array(z.string().trim().min(1, "Required")).optional()
+    locked: z.boolean().optional().nullish(),
+    assigneesId: z.array(z.string().trim().min(1, "Required")).optional().nullish()
 }).refine((data) => {
     return Object.keys(data).length > 0;
 }, {

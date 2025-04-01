@@ -25,6 +25,7 @@ export const useUpdateTask = () => {
                     return;
                 }
                 toast.error("Failed to update task");
+                return;
             }
             return response.json();
         },

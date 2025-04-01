@@ -24,6 +24,7 @@ import {useCurrent} from "@/features/auth/api/use-current";
 import {useGetWorkspace} from "@/features/workspaces/api/use-get-workspace-by-id";
 import {DatePicker} from "@/components/date-picker";
 import {MultiSelect} from "@/components/ui/multi-select";
+import {Loader} from "lucide-react";
 
 interface CreateTaskFormProps {
     onCancel?: () => void;
@@ -34,10 +35,10 @@ interface CreateTaskFormProps {
 
 export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initialValues}: CreateTaskFormProps) => {
     const {mutate, isPending} = useUpdateTask();
-    const currentUser = useCurrent();
-    const {data: workspace} = useGetWorkspace(initialValues.workspaceId);
+    const {data: currentUser, isLoading: isLoadingCurrentUser} = useCurrent();
+    const {data: workspace, isLoading: isLoadingWorkspace} = useGetWorkspace(initialValues.workspaceId);
 
-    const isAdmin = workspace?.userId === currentUser?.data.$id;
+    const isAdmin = workspace?.userId === currentUser?.$id;
     console.log("isAdmin", isAdmin);
 
     const form = useForm<z.infer<typeof updateTaskSchema>>({
@@ -55,6 +56,16 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
             }
         );
     };
+
+    if (isLoadingCurrentUser || isLoadingWorkspace || !currentUser || !workspace) {
+        return (
+            <Card className="w-full h-[714px] border-none shadow-none">
+                <CardContent className="flex items-center justify-center h-full">
+                    <Loader className="size-5 animate-spin text-muted-foreground"/>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card className="w-full h-full border-none shadow-none">
@@ -119,7 +130,7 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                             <FormField
                                 control={form.control}
                                 name="assigneesId" // Changed to "assigneeIds" for multiple assignees
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Assignees</FormLabel>
                                         <FormControl>
@@ -127,24 +138,24 @@ export const UpdateTaskForm = ({onCancel, projectOptions, memberOptions, initial
                                                 options={memberOptions.map((member) => ({
                                                     value: member.id,
                                                     label: member.name,
-                                                    icon: () => <MemberAvatar className="size-5" name={member.name} />
+                                                    icon: () => <MemberAvatar className="size-5" name={member.name}/>
                                                 }))}
                                                 value={field.value || []}
                                                 onValueChange={field.onChange}
                                                 placeholder="Select assignees"
-                                                type = "editForm"
+                                                type="editForm"
                                                 variant="inverted"
                                                 animation={2}
                                                 defaultValue={initialValues.assigneesId}
                                                 renderOption={(member) => (
                                                     <div className="flex items-center gap-x-2" key={member.id}>
-                                                        <MemberAvatar className="size-6" name={member.name} />
+                                                        <MemberAvatar className="size-6" name={member.name}/>
                                                         {member.name}
                                                     </div>
                                                 )}
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
