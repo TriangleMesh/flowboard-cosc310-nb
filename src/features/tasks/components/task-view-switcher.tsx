@@ -1,4 +1,5 @@
 "use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DottedSeparator } from "@/components/ui/dotted-separator";
@@ -14,17 +15,23 @@ import { DataTable } from "@/components/data-table";
 import KanbanView from "./kanban-view";
 import React from "react";
 import TaskProgressMetrics from "@/features/tasks/components/task-progress-metrics";
-
+import { useCurrent } from "@/features/auth/api/use-current";
+import { useGetWorkspace } from "@/features/workspaces/api/use-get-workspace-by-id";
 
 export const TaskViewSwitcher = () => {
     const [view, setView] = useQueryState("task-view", {
         defaultValue: "table",
     });
 
-    const [{ projectId, status, assigneeId, dueDate,priority,assigneesId }] = useTaskFilters();
+    const [{ projectId, status, assigneeId, dueDate, priority, assigneesId }] = useTaskFilters();
 
     const workspaceId = useWorkspaceId();
     const { open } = useCreateTaskModal();
+
+    const { data: currentUser } = useCurrent();
+    const { data: workspace } = useGetWorkspace(workspaceId);
+
+    const isAdmin = workspace?.userId === currentUser?.$id;
 
     const { data: tasks, isLoading: isLoadingTasks, error } = useGetTasks({
         workspaceId,
@@ -33,7 +40,7 @@ export const TaskViewSwitcher = () => {
         assigneeId,
         dueDate,
         priority,
-        assigneesId
+        assigneesId,
     });
 
     return (
@@ -48,9 +55,11 @@ export const TaskViewSwitcher = () => {
                         <TabsTrigger className="h-8 w-full lg:w-auto" value="kanban">
                             Kanban
                         </TabsTrigger>
-                        <TabsTrigger className="h-8 w-full lg:w-auto" value="analytics">
-                            Task Analytics
-                        </TabsTrigger>
+                        {isAdmin && (
+                            <TabsTrigger className="h-8 w-full lg:w-auto" value="analytics">
+                                Task Analytics
+                            </TabsTrigger>
+                        )}
                     </TabsList>
                     <Button onClick={open} size="sm" className="w-full lg:w-auto">
                         <PlusIcon className="size-4 mr-2" />
@@ -80,15 +89,15 @@ export const TaskViewSwitcher = () => {
                             <DataTable columns={columns} data={tasks?.documents ?? []} />
                         </TabsContent>
 
-                        {/* Kanban View */}
                         <TabsContent value="kanban" className="mt-0">
                             <KanbanView tasks={tasks?.documents ?? []} />
                         </TabsContent>
 
-                        {/* Task Analytics */}
-                        <TabsContent value="analytics" className="mt-0">
-                            <TaskProgressMetrics tasks={tasks?.documents ?? []} />
-                        </TabsContent>
+                        {isAdmin && (
+                            <TabsContent value="analytics" className="mt-0">
+                                <TaskProgressMetrics tasks={tasks?.documents ?? []} />
+                            </TabsContent>
+                        )}
                     </>
                 )}
             </div>
