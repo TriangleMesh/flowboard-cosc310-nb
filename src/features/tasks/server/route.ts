@@ -115,7 +115,6 @@ app.get(
         );
 
 
-        //todo update here
         const populatedTasks = tasks.documents.map((task) => {
             const project = projects.documents.find((proj) => proj.$id === task.projectId);
 
@@ -190,6 +189,16 @@ app.post(
                 ? highestPositionTask.documents[0].position + 1000
                 : 1000;
 
+        //multiple assignees get userId
+        const notificationUserIds: string[] = [];
+        if (assigneesId !== undefined && assigneesId !== null) {
+            for (const assigneeId of assigneesId) {
+                await databases.getDocument(DATABASE_ID, MEMBERS_ID, assigneeId).then((member) => {
+                    notificationUserIds.push(member.userId);
+                });
+            }
+        }
+
         const task = await databases.createDocument(DATABASE_ID, TASKS_ID, ID.unique(), {
             name,
             status,
@@ -202,6 +211,11 @@ app.post(
             locked,
             assigneesId
         });
+
+
+        for (const assigneeId of notificationUserIds) {
+            sendNotificationToUser(assigneeId, {type: 'system', message: `Task ${name} has been created and assigned to you.`});
+        }
 
         return c.json({data: task});
     }
