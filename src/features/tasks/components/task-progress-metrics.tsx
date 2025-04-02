@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import {
     PieChart,
     Pie,
@@ -138,120 +138,111 @@ const TaskProgressMetrics = ({ tasks }: TaskProgressMetricsProps) => {
     console.log("members", members);
     console.log("processedTasks", processedTasks);
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Upcoming Deadlines</CardTitle>
-            </CardHeader>
-            <CardContent>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                    <div>
-                        <h3 className="text-lg font-semibold text-center">Overdue Tasks</h3>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <PieChart>
-                                <Pie
-                                    data={overduePieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                    label={({ name, percent }) =>
-                                        `${name}: ${(percent * 100).toFixed(0)}%`
-                                    }
-                                >
-                                    {overduePieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-
-
-                    <div>
-                        <h3 className="text-lg font-semibold text-center">Upcoming (Within Week)</h3>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <PieChart>
-                                <Pie
-                                    data={upcomingWithinWeekPieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                    label={({ name, percent }) =>
-                                        `${name}: ${(percent * 100).toFixed(0)}%`
-                                    }
-                                >
-                                    {upcomingWithinWeekPieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-
-
-                    <div>
-                        <h3 className="text-lg font-semibold text-center">Upcoming (After Week)</h3>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <PieChart>
-                                <Pie
-                                    data={upcomingAfterWeekPieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                    label={({ name, percent }) =>
-                                        `${name}: ${(percent * 100).toFixed(0)}%`
-                                    }
-                                >
-                                    {upcomingAfterWeekPieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
+        <CardContent>
+            <div className="flex flex-col gap-8">
+                <div className="flex flex-col items-center">
+                    <h3 className="text-lg font-semibold text-center mb-2">Overdue Tasks</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <Pie
+                                data={overduePieData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                                label={({ name, percent }) =>
+                                    `${name}: ${(percent * 100).toFixed(0)}%`
+                                }
+                            >
+                                {overduePieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
                 </div>
-                <div className="mt-8">
-                    <h3 className="text-lg font-semibold text-center">Team Performance</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.entries(memberCompletionStats).map(([id, stat]) => {
-                            const percent = stat.total > 0 ? (stat.completed / stat.total) * 100 : 0;
-                            return (
-                                <div key={id} className="p-4 border rounded-md">
-                                    <div className="font-medium">{stat.name}</div>
-                                    <div className="text-sm text-gray-500">
-                                        {stat.completed} / {stat.total} tasks completed ({percent.toFixed(0)}%)
-                                    </div>
-                                    <div className="w-full bg-gray-200 h-2 rounded mt-1">
-                                        <div
-                                            className="bg-green-500 h-2 rounded"
-                                            style={{ width: `${percent}%` }}
-                                        ></div>
-                                    </div>
+
+                <div className="flex flex-col items-center">
+                    <h3 className="text-lg font-semibold text-center mb-2">Upcoming (Within Week)</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <Pie
+                                data={upcomingWithinWeekPieData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                                label={({ name, percent }) =>
+                                    `${name}: ${(percent * 100).toFixed(0)}%`
+                                }
+                            >
+                                {upcomingWithinWeekPieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="flex flex-col items-center">
+                    <h3 className="text-lg font-semibold text-center mb-2">Upcoming (After Week)</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <Pie
+                                data={upcomingAfterWeekPieData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                                label={({ name, percent }) =>
+                                    `${name}: ${(percent * 100).toFixed(0)}%`
+                                }
+                            >
+                                {upcomingAfterWeekPieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="mt-8">
+                <h3 className="text-lg font-semibold text-center">Team Performance</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {Object.entries(memberCompletionStats).map(([id, stat]) => {
+                        const percent = stat.total > 0 ? (stat.completed / stat.total) * 100 : 0;
+                        return (
+                            <div key={id} className="p-4 border rounded-md">
+                                <div className="font-medium">{stat.name}</div>
+                                <div className="text-sm text-gray-500">
+                                    {stat.completed} / {stat.total} tasks completed ({percent.toFixed(0)}%)
                                 </div>
-                            );
-                        })}
-                    </div>
+                                <div className="w-full bg-gray-200 h-2 rounded mt-1">
+                                    <div
+                                        className="bg-green-500 h-2 rounded"
+                                        style={{ width: `${percent}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-
-            </CardContent>
-        </Card>
-    );
+            </div>
+        </CardContent>
+    )
 };
 
 export default TaskProgressMetrics;
