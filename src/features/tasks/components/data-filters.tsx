@@ -5,6 +5,7 @@ import {ListChecksIcon, UserIcon, FolderIcon, Clock1Icon} from "lucide-react";
 import {TaskPriority, TaskStatus} from "../types";
 import {DatePicker} from "@/components/date-picker";
 import {useTaskFilters} from "../hooks/use-task-filters";
+import React from "react";
 
 import {
     Select,

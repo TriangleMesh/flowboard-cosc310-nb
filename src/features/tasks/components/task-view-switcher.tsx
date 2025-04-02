@@ -13,6 +13,7 @@ import { columns } from "./columns";
 import { DataTable } from "@/components/data-table";
 import KanbanView from "./kanban-view";
 import React from "react";
+import TaskProgressMetrics from "@/features/tasks/components/task-progress-metrics";
 
 
 export const TaskViewSwitcher = () => {
@@ -38,6 +39,7 @@ export const TaskViewSwitcher = () => {
     return (
         <Tabs defaultValue={view} onValueChange={setView} className="flex-1 w-full border rounded-lg">
             <div className="h-full flex flex-col overflow-auto p-4">
+                {/* Tabs List */}
                 <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
                     <TabsList className="w-full lg:w-auto">
                         <TabsTrigger className="h-8 w-full lg:w-auto" value="table">
@@ -45,6 +47,9 @@ export const TaskViewSwitcher = () => {
                         </TabsTrigger>
                         <TabsTrigger className="h-8 w-full lg:w-auto" value="kanban">
                             Kanban
+                        </TabsTrigger>
+                        <TabsTrigger className="h-8 w-full lg:w-auto" value="analytics">
+                            Task Analytics
                         </TabsTrigger>
                     </TabsList>
                     <Button onClick={open} size="sm" className="w-full lg:w-auto">
@@ -56,6 +61,7 @@ export const TaskViewSwitcher = () => {
                 <DataFilters />
                 <DottedSeparator className="my-4" />
 
+                {/* Content */}
                 {isLoadingTasks ? (
                     <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
                         <Loader className="size-5 animate-spin text-muted-foreground" />
@@ -74,8 +80,14 @@ export const TaskViewSwitcher = () => {
                             <DataTable columns={columns} data={tasks?.documents ?? []} />
                         </TabsContent>
 
+                        {/* Kanban View */}
                         <TabsContent value="kanban" className="mt-0">
                             <KanbanView tasks={tasks?.documents ?? []} />
+                        </TabsContent>
+
+                        {/* Task Analytics */}
+                        <TabsContent value="analytics" className="mt-0">
+                            <TaskProgressMetrics tasks={tasks?.documents ?? []} />
                         </TabsContent>
                     </>
                 )}
